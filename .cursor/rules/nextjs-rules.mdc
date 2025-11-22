@@ -1,0 +1,77 @@
+---
+alwaysApply: true
+---
+
+# Next.js 16 ベストプラクティス
+
+### 1. App Routerの活用
+- App Routerをデフォルトで使用し、`app`ディレクトリ構造に従う
+- Server Componentsをデフォルトとし、必要に応じて`'use client'`ディレクティブでClient Componentsを使用
+- ルーティングはファイルシステムベースで実装
+
+### 2. Server ComponentsとClient Componentsの使い分け
+- **Server Components（デフォルト）**: データフェッチング、データベースアクセス、バックエンドリソースへのアクセス
+- **Client Components（`'use client'`）**: インタラクティブな機能（useState、useEffect、イベントハンドラー）、ブラウザAPIの使用
+- 可能な限りServer Componentsを使用し、必要な部分のみClient Componentsにする
+
+### 3. データフェッチング
+- Server Components内で直接データフェッチングを行う
+- `fetch` APIを使用する際は、Next.jsの自動的なリクエストの重複排除を活用
+- キャッシュ戦略を適切に設定（`cache: 'force-cache'`、`cache: 'no-store'`など）
+
+### 4. Cache Components（キャッシュコンポーネント）
+- Next.js 16のCache Components機能を活用
+- `use cache`ディレクティブを使用してキャッシュを明示的に制御
+- 部分的な事前レンダリング（PPR）を実現し、パフォーマンスを最適化
+
+### 5. メタデータの設定
+- `metadata`オブジェクトまたは`generateMetadata`関数を使用してメタデータを設定
+- 各ページ/レイアウトで適切なSEOメタデータを設定
+
+### 6. パフォーマンス最適化
+- **画像最適化**: `next/image`コンポーネントを使用
+- **フォント最適化**: `next/font`を使用してフォントを最適化
+- **プリフェッチ**: レイアウトの重複排除とインクリメンタルプリフェッチを活用
+- **コード分割**: 動的インポート（`next/dynamic`）を適切に使用
+
+### 7. エラーハンドリング
+- `error.tsx`ファイルでエラーバウンダリを実装
+- `not-found.tsx`ファイルで404ページを実装
+- `loading.tsx`ファイルでローディング状態を実装
+
+### 8. フォームとサーバーアクション
+- Server Actionsを使用してフォーム処理を実装
+- `useFormStatus`と`useFormState`フックを活用
+- 適切なバリデーションとエラーハンドリングを実装
+
+### 9. セキュリティ
+- 環境変数は`.env.local`に保存し、`.gitignore`に含める
+- 機密情報はサーバーサイドでのみ処理
+- 適切なCORS設定とセキュリティヘッダーの設定
+
+### 10. TypeScriptの活用
+- 型安全性を確保するため、可能な限りTypeScriptを使用
+- `params`、`searchParams`などの型を適切に定義
+- 型推論を活用し、不要な型アノテーションを避ける
+
+### 11. 開発体験の向上
+- Turbopack（Next.js 16のデフォルトバンドラー）を活用
+- ESLintとTypeScriptの型チェックを活用
+- 適切なエラーメッセージとデバッグ情報の提供
+
+### 12. コード品質
+- コンポーネントは小さく、再利用可能に保つ
+- 適切な命名規則に従う
+- コメントは必要最小限にし、自己説明的なコードを書く
+
+### 13. useEffectの適切な使用（You Might Not Need an Effect）
+- **レンダリング時に計算できるものはEffectを使わない**: propsやstateから計算できる値は、stateに保存せずレンダリング時に直接計算する
+- **高価な計算は`useMemo`でキャッシュ**: 計算が重い場合は`useMemo`を使用し、`useEffect`でstateを更新しない
+- **propsやstateに基づくstate更新は不要**: 既存のpropsやstateから計算できる値は、別のstateとして管理しない
+- **ユーザーイベントはイベントハンドラーで処理**: ボタンクリックやフォーム送信などのユーザーアクションは、`useEffect`ではなくイベントハンドラーで処理する
+- **データ変換はレンダリング時に実行**: リストのフィルタリングやソートなどは、Effectではなくレンダリング時に実行する
+- **外部システムとの同期にのみEffectを使用**: Effectは外部システム（DOM、ネットワーク、サードパーティライブラリなど）との同期にのみ使用する
+- **データフェッチングのクリーンアップ**: データフェッチングでEffectを使用する場合は、レースコンディションを防ぐためクリーンアップ関数を実装する
+- **不要なEffectを削除**: 不要なEffectを削除することで、コードがシンプルになり、パフォーマンスが向上し、バグが減る
+
+参考: [You Might Not Need an Effect - React](https://react.dev/learn/you-might-not-need-an-effect)

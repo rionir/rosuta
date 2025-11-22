@@ -1,0 +1,25 @@
+---
+alwaysApply: true
+---
+
+# プロジェクトルール
+
+## 実装前の確認事項
+
+### ドキュメントの確認
+- **実装を始める前には、必ず`docs`ディレクトリ配下のドキュメントを確認してください**
+  - `docs/requirements.md` - 要件定義
+  - `docs/tech-stack.md` - 技術スタック
+  - `docs/db-design.md` - データベース設計
+  - `docs/process.md` - 開発プロセス
+- これらのドキュメントを確認することで、プロジェクトのガイドラインや仕様を把握し、一貫性のある実装が可能になります
+
+## 技術スタック別のルール
+
+このプロジェクトでは、以下の技術スタック別のルールファイルが設定されています：
+- `nextjs-rules.mdc` - Next.js 16のベストプラクティス
+- `supabase-rules.mdc` - Supabase（バックエンド・認証）のベストプラクティス
+- `stripe-rules.mdc` - Stripe（ユーザー課金）のベストプラクティス
+- `git-rules.mdc` - Git/GitHubのベストプラクティス
+
+各ルールファイルは`alwaysApply: true`が設定されているため、すべてのセッションで自動的に適用されます。
