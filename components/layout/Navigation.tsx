@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useState, useEffect } from 'react'
 import { usePathname } from 'next/navigation'
 import { signOut } from '@/lib/actions/auth'
+import { ThemeToggle } from '@/components/theme/ThemeToggle'
 
 interface NavigationProps {
   user: {
@@ -52,16 +53,16 @@ export default function Navigation({ user, isAdmin }: NavigationProps) {
   return (
     <>
       {/* デスクトップ: 上部ナビゲーション */}
-      <nav className="hidden md:block sticky top-0 z-50 border-b border-blue-100 bg-white/95 backdrop-blur-lg shadow-sm">
+      <nav className="hidden md:block sticky top-0 z-50 border-b border-blue-100 bg-white/95 backdrop-blur-lg shadow-sm dark:border-gray-700 dark:bg-gray-800/95">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
           {/* Logo and Navigation Links */}
           <div className="flex items-center space-x-10">
             <Link href="/" className="flex items-center space-x-2.5 group">
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-600 shadow-sm transition-all group-hover:bg-blue-700 group-hover:shadow-md">
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-600 shadow-sm transition-all group-hover:bg-blue-700 group-hover:shadow-md dark:bg-blue-500">
                 <span className="text-lg font-bold text-white">ロ</span>
               </div>
-              <span className="text-xl font-bold text-gray-900 tracking-tight">
+              <span className="text-xl font-bold text-gray-900 tracking-tight dark:text-gray-100">
                 ロスタ
               </span>
             </Link>
@@ -80,17 +81,18 @@ export default function Navigation({ user, isAdmin }: NavigationProps) {
 
           {/* User Menu */}
           <div className="flex items-center space-x-4">
-              <span className="text-sm font-medium text-gray-700">
-                {user.profile?.last_name && user.profile?.first_name 
-                  ? `${user.profile.last_name} ${user.profile.first_name}` 
-                  : userEmail}
-              </span>
+            <ThemeToggle />
+            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              {user.profile?.last_name && user.profile?.first_name 
+                ? `${user.profile.last_name} ${user.profile.first_name}` 
+                : userEmail}
+            </span>
             <form action={async () => {
               await signOut()
             }}>
               <button
                 type="submit"
-                className="rounded-lg px-4 py-2 text-sm font-medium text-gray-600 transition-all hover:bg-blue-50 hover:text-blue-700"
+                className="rounded-lg px-4 py-2 text-sm font-medium text-gray-600 transition-all hover:bg-blue-50 hover:text-blue-700 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-gray-100"
               >
                 ログアウト
               </button>
@@ -101,21 +103,22 @@ export default function Navigation({ user, isAdmin }: NavigationProps) {
     </nav>
 
       {/* モバイル: 上部バー（ハンバーガーメニュー付き） */}
-      <nav className="md:hidden sticky top-0 z-50 border-b border-blue-100 bg-white/95 backdrop-blur-lg shadow-sm">
+      <nav className="md:hidden sticky top-0 z-50 border-b border-blue-100 bg-white/95 backdrop-blur-lg shadow-sm dark:border-gray-700 dark:bg-gray-800/95">
         <div className="flex h-16 items-center justify-between px-4">
           <Link href="/" className="flex items-center space-x-2.5">
             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-600 shadow-sm">
               <span className="text-lg font-bold text-white">ロ</span>
             </div>
-            <span className="text-xl font-bold text-gray-900 tracking-tight">
+            <span className="text-xl font-bold text-gray-900 tracking-tight dark:text-gray-100">
               ロスタ
             </span>
           </Link>
           
           <div className="flex items-center space-x-3">
+            <ThemeToggle />
             <button
               onClick={() => setIsSidebarOpen(true)}
-              className="p-2 text-gray-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-all"
+              className="p-2 text-gray-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-all dark:text-gray-300 dark:hover:text-gray-100 dark:hover:bg-gray-700"
               aria-label="メニューを開く"
             >
               <svg
@@ -145,24 +148,24 @@ export default function Navigation({ user, isAdmin }: NavigationProps) {
 
       {/* モバイル: サイドバー */}
       <aside
-        className={`md:hidden fixed top-0 left-0 z-50 h-full w-64 bg-white shadow-xl transform transition-transform duration-300 ease-in-out ${
+        className={`md:hidden fixed top-0 left-0 z-50 h-full w-64 bg-white shadow-xl transform transition-transform duration-300 ease-in-out dark:bg-gray-800 ${
           isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
         <div className="flex flex-col h-full">
           {/* サイドバーヘッダー */}
-          <div className="flex items-center justify-between p-4 border-b border-blue-100">
+          <div className="flex items-center justify-between p-4 border-b border-blue-100 dark:border-gray-700">
             <div className="flex items-center space-x-2.5">
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-600 shadow-sm">
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-600 shadow-sm dark:bg-blue-500">
                 <span className="text-lg font-bold text-white">ロ</span>
               </div>
-              <span className="text-xl font-bold text-gray-900 tracking-tight">
+              <span className="text-xl font-bold text-gray-900 tracking-tight dark:text-gray-100">
                 ロスタ
               </span>
             </div>
             <button
               onClick={closeSidebar}
-              className="p-2 text-gray-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-all"
+              className="p-2 text-gray-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-all dark:text-gray-300 dark:hover:text-gray-100 dark:hover:bg-gray-700"
               aria-label="メニューを閉じる"
             >
               <svg
@@ -193,21 +196,24 @@ export default function Navigation({ user, isAdmin }: NavigationProps) {
           </nav>
 
           {/* ユーザー情報とログアウト */}
-          <div className="border-t border-blue-100 p-4 space-y-3">
+          <div className="border-t border-blue-100 p-4 space-y-3 dark:border-gray-700">
+            <div className="flex items-center justify-between mb-2">
+              <ThemeToggle />
+            </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-gray-900 truncate">
+              <p className="text-sm font-medium text-gray-900 truncate dark:text-gray-100">
                 {user.profile?.last_name && user.profile?.first_name 
                   ? `${user.profile.last_name} ${user.profile.first_name}` 
                   : userEmail}
               </p>
-              <p className="text-xs text-gray-500 truncate">{userEmail}</p>
+              <p className="text-xs text-gray-500 truncate dark:text-gray-400">{userEmail}</p>
             </div>
             <form action={async () => {
               await signOut()
             }} className="w-full">
               <button
                 type="submit"
-                className="w-full rounded-lg px-4 py-2 text-sm font-medium text-gray-600 transition-all hover:bg-blue-50 hover:text-blue-700 text-left"
+                className="w-full rounded-lg px-4 py-2 text-sm font-medium text-gray-600 transition-all hover:bg-blue-50 hover:text-blue-700 text-left dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-gray-100"
               >
                 ログアウト
               </button>
@@ -230,8 +236,8 @@ function NavLink({ href, label, pathname }: { href: string; label: string; pathn
         href={href}
         className={`relative px-4 py-2 text-sm font-medium rounded-lg transition-all ${
           isActive
-            ? 'text-purple-700 bg-purple-50'
-            : 'text-gray-600 hover:text-purple-700 hover:bg-purple-50'
+            ? 'text-purple-700 bg-purple-50 dark:text-purple-300 dark:bg-purple-900/30'
+            : 'text-gray-600 hover:text-purple-700 hover:bg-purple-50 dark:text-gray-300 dark:hover:text-purple-300 dark:hover:bg-purple-900/20'
         }`}
       >
         {label}
@@ -244,8 +250,8 @@ function NavLink({ href, label, pathname }: { href: string; label: string; pathn
       href={href}
       className={`relative px-4 py-2 text-sm font-medium rounded-lg transition-all ${
         isActive
-          ? 'text-blue-700 bg-blue-50'
-          : 'text-gray-600 hover:text-blue-700 hover:bg-blue-50'
+          ? 'text-blue-700 bg-blue-50 dark:text-blue-300 dark:bg-blue-900/30'
+          : 'text-gray-600 hover:text-blue-700 hover:bg-blue-50 dark:text-gray-300 dark:hover:text-blue-300 dark:hover:bg-blue-900/20'
       }`}
     >
       {label}
@@ -275,8 +281,8 @@ function SidebarNavLink({
         onClick={onClick}
         className={`block px-4 py-3 text-base font-medium rounded-lg transition-all ${
           isActive
-            ? 'text-purple-700 bg-purple-50'
-            : 'text-gray-700 hover:text-purple-700 hover:bg-purple-50'
+            ? 'text-purple-700 bg-purple-50 dark:text-purple-300 dark:bg-purple-900/30'
+            : 'text-gray-700 hover:text-purple-700 hover:bg-purple-50 dark:text-gray-300 dark:hover:text-purple-300 dark:hover:bg-purple-900/20'
         }`}
       >
         {label}
@@ -290,8 +296,8 @@ function SidebarNavLink({
       onClick={onClick}
       className={`block px-4 py-3 text-base font-medium rounded-lg transition-all ${
         isActive
-          ? 'text-blue-700 bg-blue-50'
-          : 'text-gray-700 hover:text-blue-700 hover:bg-blue-50'
+          ? 'text-blue-700 bg-blue-50 dark:text-blue-300 dark:bg-blue-900/30'
+          : 'text-gray-700 hover:text-blue-700 hover:bg-blue-50 dark:text-gray-300 dark:hover:text-blue-300 dark:hover:bg-blue-900/20'
       }`}
     >
       {label}

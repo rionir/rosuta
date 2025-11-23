@@ -148,14 +148,14 @@ function FeatureCard({
   return (
     <Link
       href={href}
-      className="group relative overflow-hidden rounded-2xl bg-white p-8 shadow-sm ring-1 ring-purple-100 transition-all duration-300 hover:shadow-lg hover:ring-purple-200 hover:-translate-y-1"
+      className="group relative overflow-hidden rounded-2xl bg-white p-8 shadow-sm ring-1 ring-purple-100 transition-all duration-300 hover:shadow-lg hover:ring-purple-200 hover:-translate-y-1 dark:bg-gray-800 dark:ring-gray-700 dark:hover:ring-gray-600"
     >
       <div className="relative">
         <div className={`mb-6 inline-flex h-14 w-14 items-center justify-center rounded-xl ${iconBgClass} shadow-sm transition-all ${iconHoverClass} group-hover:shadow-md group-hover:scale-110`}>
           {renderIcon()}
         </div>
-        <h3 className="mb-3 text-2xl font-bold text-gray-900">{title}</h3>
-        <p className="text-sm leading-relaxed text-gray-600">{description}</p>
+        <h3 className="mb-3 text-2xl font-bold text-gray-900 dark:text-gray-100">{title}</h3>
+        <p className="text-sm leading-relaxed text-gray-600 dark:text-gray-400">{description}</p>
       </div>
     </Link>
   )

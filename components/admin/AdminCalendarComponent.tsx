@@ -296,7 +296,7 @@ export default function AdminCalendarComponent({
           <select
             value={selectedStoreId}
             onChange={(e) => handleStoreChange(parseInt(e.target.value))}
-            className="block w-full rounded-lg border border-gray-300 px-4 py-2.5 shadow-sm transition-all focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 hover:border-gray-400"
+            className="block w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-gray-900 shadow-sm transition-all focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 hover:border-gray-400"
           >
             {stores.map((store) => (
               <option key={store.store_id} value={store.store_id}>
@@ -314,7 +314,7 @@ export default function AdminCalendarComponent({
             <select
               value={selectedUserId || ''}
               onChange={(e) => handleUserChange(e.target.value || undefined)}
-              className="block w-full rounded-lg border border-gray-300 px-4 py-2.5 shadow-sm transition-all focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 hover:border-gray-400"
+              className="block w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-gray-900 shadow-sm transition-all focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 hover:border-gray-400"
             >
               <option value="">すべてのスタッフ</option>
               {storeUsers.map((storeUser) => (

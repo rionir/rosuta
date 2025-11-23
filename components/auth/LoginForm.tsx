@@ -41,8 +41,8 @@ export default function LoginForm() {
   return (
     <form action={handleSubmit} className="mt-8 space-y-6">
       {error && (
-        <div className="rounded-lg bg-red-50 border border-red-200 p-4">
-          <p className="text-sm font-medium text-red-800">{error}</p>
+        <div className="rounded-lg bg-red-50 border border-red-200 p-4 dark:bg-red-900/20 dark:border-red-800">
+          <p className="text-sm font-medium text-red-800 dark:text-red-300">{error}</p>
         </div>
       )}
       <div className="space-y-4 rounded-md shadow-sm">
@@ -56,7 +56,7 @@ export default function LoginForm() {
             type="email"
             autoComplete="email"
             required
-            className="mt-1 block w-full rounded-xl border border-gray-300 px-4 py-3 shadow-sm transition-all focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 hover:border-gray-400"
+            className="mt-1 block w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-gray-900 shadow-sm transition-all focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 hover:border-gray-400"
           />
         </div>
         <div>
@@ -69,7 +69,7 @@ export default function LoginForm() {
             type="password"
             autoComplete="current-password"
             required
-            className="mt-1 block w-full rounded-xl border border-gray-300 px-4 py-3 shadow-sm transition-all focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 hover:border-gray-400"
+            className="mt-1 block w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-gray-900 shadow-sm transition-all focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 hover:border-gray-400"
           />
         </div>
       </div>

@@ -109,7 +109,7 @@ export default function ClockRecordsApprovalComponent({
           id="store"
           value={selectedStore?.toString() || ''}
           onChange={(e) => handleStoreChange(e.target.value)}
-          className="block w-full rounded-lg border border-gray-300 px-4 py-2.5 shadow-sm transition-all focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+          className="block w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-gray-900 shadow-sm transition-all focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
         >
           <option value="">店舗を選択</option>
           {stores.map((store) => (
