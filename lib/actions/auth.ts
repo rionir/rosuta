@@ -159,3 +159,25 @@ export async function getUserCompanies(userId: string) {
   return { data }
 }
 
+/**
+ * ユーザーが管理者かどうかを判定
+ */
+export async function isUserAdmin(userId: string): Promise<boolean> {
+  const supabase = await createClient()
+
+  const { data, error } = await supabase
+    .from('company_users')
+    .select('is_admin')
+    .eq('user_id', userId)
+    .eq('is_active', true)
+    .eq('is_admin', true)
+    .limit(1)
+
+  if (error) {
+    console.error('Error checking admin status:', error)
+    return false
+  }
+
+  return data && data.length > 0
+}
+

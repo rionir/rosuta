@@ -14,12 +14,18 @@ export default async function LoginPage() {
   // }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50">
-      <div className="w-full max-w-md space-y-8 rounded-lg bg-white p-8 shadow-md">
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-bold tracking-tight text-gray-900">
+    <div className="flex min-h-screen items-center justify-center bg-blue-50/50 p-4">
+      <div className="w-full max-w-md space-y-8 rounded-2xl bg-white p-10 shadow-lg ring-1 ring-blue-100">
+        <div className="text-center">
+          <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-2xl bg-blue-600 shadow-md">
+            <span className="text-4xl font-bold text-white">ロ</span>
+          </div>
+          <h2 className="text-3xl font-bold tracking-tight text-gray-900">
             ロスタにログイン
           </h2>
+          <p className="mt-3 text-sm text-gray-600">
+            勤怠・シフト管理システム
+          </p>
         </div>
         <LoginForm />
       </div>

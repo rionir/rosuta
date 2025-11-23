@@ -20,12 +20,16 @@ export default async function ClockPage({
 
   if (!userStores || userStores.length === 0) {
     return (
-      <div className="min-h-screen bg-gray-50 p-4">
-        <div className="mx-auto max-w-md rounded-lg bg-white p-6 shadow">
-          <h2 className="text-lg font-semibold text-gray-900">店舗未所属</h2>
-          <p className="mt-2 text-gray-600">
-            打刻を行うには、まず管理者に店舗への所属を依頼してください。
-          </p>
+      <div className="mx-auto max-w-2xl px-4 py-8 sm:px-6 lg:px-8">
+        <div className="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-blue-100">
+          <div className="border-b border-blue-100 bg-blue-50 px-8 py-7">
+            <h2 className="text-2xl font-bold text-gray-900 tracking-tight">店舗未所属</h2>
+          </div>
+          <div className="p-8">
+            <p className="text-gray-700 leading-relaxed">
+              打刻を行うには、まず管理者に店舗への所属を依頼してください。
+            </p>
+          </div>
         </div>
       </div>
     )
@@ -45,7 +49,7 @@ export default async function ClockPage({
       user={user}
       stores={userStores}
       selectedStoreId={selectedStoreId}
-      workStatus={workStatus}
+      workStatus={workStatus || null}
     />
   )
 }
