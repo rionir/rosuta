@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createShift, updateShift, deleteShift } from '@/lib/actions/shifts'
 import { copyShifts } from '@/lib/actions/shift-copies'
+import { formatUserName } from '@/lib/utils/user-name'
 
 interface ShiftsManagementComponentProps {
   user: {
@@ -23,7 +24,8 @@ interface ShiftsManagementComponentProps {
     user_id: string
     users: {
       id: string
-      name: string
+      last_name: string
+      first_name: string
     }
   }>
   shifts: Array<{
@@ -34,7 +36,8 @@ interface ShiftsManagementComponentProps {
     scheduled_end: string
     users: {
       id: string
-      name: string
+      last_name: string
+      first_name: string
     }
   }>
   year: number
@@ -338,7 +341,7 @@ export default function ShiftsManagementComponent({
                   <option value="">選択してください</option>
                   {storeUsers.map((su) => (
                     <option key={su.user_id} value={su.user_id}>
-                      {su.users.name}
+                      {formatUserName(su.users)}
                     </option>
                   ))}
                 </select>
@@ -531,7 +534,7 @@ export default function ShiftsManagementComponent({
                               id={`scheduledEndTime-${shift.id}`}
                               name="scheduledEndTime"
                               type="time"
-                              defaultValue={new Date(shift.scheduled_end).toTimeString().split(' ')[0].substring(0, 5)}
+                              defaultValue={new Date(shift.scheduled_end).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit', hour12: false })}
                               required
                               className="block w-full rounded-lg border border-gray-300 px-4 py-2.5 shadow-sm transition-all focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
                             />
@@ -560,7 +563,7 @@ export default function ShiftsManagementComponent({
                     ) : (
                       <div className="flex items-center justify-between">
                         <div>
-                          <h3 className="text-lg font-semibold text-gray-900">{shift.users?.name || 'ユーザー不明'}</h3>
+                          <h3 className="text-lg font-semibold text-gray-900">{shift.users ? formatUserName(shift.users) : 'ユーザー不明'}</h3>
                           <p className="mt-1 text-sm text-gray-600">
                             {new Date(shift.scheduled_start).toLocaleDateString('ja-JP')} {new Date(shift.scheduled_start).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })} - {new Date(shift.scheduled_end).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })}
                           </p>
