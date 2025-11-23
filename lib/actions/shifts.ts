@@ -43,7 +43,19 @@ export async function createShift(input: CreateShiftInput) {
 
   revalidatePath('/shifts')
   revalidatePath('/admin/shifts')
-  return { data }
+  return { 
+    data: { 
+      id: data.id, 
+      user_id: data.user_id, 
+      store_id: data.store_id, 
+      date: data.date, 
+      scheduled_start: data.scheduled_start, 
+      scheduled_end: data.scheduled_end, 
+      created_by: data.created_by,
+      created_at: data.created_at,
+      updated_at: data.updated_at
+    } 
+  }
 }
 
 /**
@@ -133,6 +145,7 @@ export async function getUserShifts(
 
 /**
  * 店舗のシフト一覧を取得（日付範囲指定）
+ * 注意: ユーザー情報は含まれません。呼び出し側でstoreUsersからマージしてください。
  */
 export async function getStoreShifts(
   storeId: number,
@@ -143,13 +156,7 @@ export async function getStoreShifts(
 
   const { data, error } = await supabase
     .from('shifts')
-    .select(`
-      *,
-      users (
-        id,
-        name
-      )
-    `)
+    .select('*')
     .eq('store_id', storeId)
     .gte('date', startDate)
     .lte('date', endDate)
@@ -157,9 +164,11 @@ export async function getStoreShifts(
     .order('scheduled_start', { ascending: true })
 
   if (error) {
+    console.error('getStoreShifts error:', error)
     return { error: error.message }
   }
 
-  return { data }
+  console.log('getStoreShifts result:', { storeId, startDate, endDate, count: data?.length || 0 })
+  return { data: data || [] }
 }
 

@@ -206,11 +206,12 @@ export async function getStoreClockRecords(
 ) {
   const supabase = await createClient()
 
+  // 外部キーを明示的に指定（user_idを使用）
   const { data, error } = await supabase
     .from('clock_records')
     .select(`
       *,
-      users (
+      users!clock_records_user_id_fkey (
         id,
         name
       )
@@ -233,11 +234,12 @@ export async function getStoreClockRecords(
 export async function getPendingClockRecords(storeId: number) {
   const supabase = await createClient()
 
+  // 外部キーを明示的に指定（user_idを使用）
   const { data, error } = await supabase
     .from('clock_records')
     .select(`
       *,
-      users (
+      users!clock_records_user_id_fkey (
         id,
         name
       )
