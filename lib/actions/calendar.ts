@@ -68,9 +68,9 @@ export async function getCalendarData(
   // 日付ごとにデータをグループ化
   const calendarData: Record<string, CalendarDayData> = {}
 
-  // シフトを日付ごとにグループ化
+  // シフトを日付ごとにグループ化（scheduled_startから日付を抽出）
   shifts.forEach((shift) => {
-    const date = shift.date
+    const date = new Date(shift.scheduled_start).toISOString().split('T')[0]
     if (!calendarData[date]) {
       calendarData[date] = {
         date,

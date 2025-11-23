@@ -8,7 +8,6 @@ export interface AdminCalendarDayData {
   date: string
   shifts: Array<{
     id: number
-    date: string
     scheduled_start: string
     scheduled_end: string
     user_id: string
@@ -111,9 +110,10 @@ export async function getAdminCalendarData(
   // 日付ごとにデータをグループ化
   const calendarData: Record<string, AdminCalendarDayData> = {}
 
-  // シフトを日付ごとにグループ化
+  // シフトを日付ごとにグループ化（scheduled_startから日付を抽出）
   shifts.forEach((shift) => {
-    const date = shift.date
+    // scheduled_startはTIMESTAMP型なので、日付部分を抽出
+    const date = new Date(shift.scheduled_start).toISOString().split('T')[0]
     if (!calendarData[date]) {
       calendarData[date] = {
         date,
@@ -161,7 +161,8 @@ export async function getUnclockedUsers(
       )
     `)
     .eq('store_id', storeId)
-    .eq('date', date)
+    .gte('scheduled_start', `${date}T00:00:00`)
+    .lte('scheduled_start', `${date}T23:59:59`)
 
   if (shiftsError) {
     return { error: shiftsError.message }
@@ -196,6 +197,7 @@ export async function getUnclockedUsers(
     .map((shift) => ({
       user_id: shift.user_id,
       name: shift.users?.name || '不明',
+      // scheduled_startとscheduled_endはTIMESTAMP型なので、そのまま使用
       scheduled_start: shift.scheduled_start,
       scheduled_end: shift.scheduled_end,
     }))
