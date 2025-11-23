@@ -20,18 +20,6 @@ export default async function AdminPage() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-      {/* Welcome Card */}
-      <div className="mb-10 overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-blue-100">
-        <div className="border-b border-blue-100 bg-white px-8 py-10">
-          <h1 className="text-4xl font-bold text-gray-900 tracking-tight">
-            管理画面
-          </h1>
-          <p className="mt-3 text-lg text-gray-600">
-            店舗・スタッフ・設定の管理を行います。下記のカードから機能を選択してください。
-          </p>
-        </div>
-      </div>
-
       {/* Feature Cards */}
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         <FeatureCard
