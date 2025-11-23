@@ -4,6 +4,9 @@ import { getStoreUsers } from '@/lib/actions/user-stores'
 import { redirect } from 'next/navigation'
 import AdminCalendarComponent from '@/components/admin/AdminCalendarComponent'
 
+// ページレベルのキャッシュ設定（60秒間）
+export const revalidate = 60
+
 export default async function AdminCalendarPage({
   searchParams,
 }: {
@@ -66,6 +69,7 @@ export default async function AdminCalendarPage({
     />
   )
 }
+
 
 
 

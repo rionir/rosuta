@@ -1,7 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
-import { revalidatePath } from 'next/cache'
+import { revalidatePath, revalidateTag } from 'next/cache'
 
 export interface AssignUserToStoreInput {
   userId: string
@@ -45,6 +45,8 @@ export async function assignUserToStore(input: AssignUserToStoreInput) {
         return { error: updateError.message }
       }
 
+      // キャッシュを無効化
+      revalidateTag(`store-users-${input.storeId}`, 'max')
       revalidatePath('/admin/users')
       return { data: updateData }
     }
@@ -74,6 +76,10 @@ export async function updateUserStore(input: UpdateUserStoreInput) {
     return { error: error.message }
   }
 
+  // キャッシュを無効化
+  if (data) {
+    revalidateTag(`store-users-${data.store_id}`, 'max')
+  }
   revalidatePath('/admin/users')
   return { data }
 }
@@ -119,7 +125,10 @@ export async function getStoreUsers(storeId: number) {
   const { data, error } = await supabase
     .from('user_stores')
     .select(`
-      *,
+      user_id,
+      store_id,
+      is_active,
+      created_at,
       users!user_stores_user_id_fkey (
         id,
         last_name,
@@ -137,9 +146,15 @@ export async function getStoreUsers(storeId: number) {
     return { error: error.message }
   }
 
-  console.log('getStoreUsers data count:', data?.length || 0)
-  console.log('getStoreUsers data:', data)
+  // usersが配列の場合、最初の要素を取得（1対1の関係なので）
+  const formattedData = (data || []).map((item: any) => ({
+    user_id: item.user_id,
+    store_id: item.store_id,
+    is_active: item.is_active,
+    created_at: item.created_at,
+    users: Array.isArray(item.users) ? item.users[0] || null : item.users,
+  }))
 
-  return { data: data || [] }
+  return { data: formattedData }
 }
 
