@@ -40,7 +40,7 @@ export default async function AdminPage() {
           href="/admin/users"
           title="スタッフ管理"
           description="スタッフの追加・編集・削除、店舗所属設定を行います"
-          icon="👥"
+          icon="users"
           bgColor="bg-blue-700"
         />
         <FeatureCard
@@ -82,33 +82,37 @@ function FeatureCard({
   icon: string
   bgColor: string
 }) {
+  // すべてのアイコンを同じ紫色に統一
+  const iconBgClass = 'bg-purple-500'
+  const iconHoverClass = 'hover:bg-purple-600'
+
   return (
     <Link
       href={href}
-      className="group relative overflow-hidden rounded-2xl bg-white p-8 shadow-sm ring-1 ring-blue-100 transition-all duration-300 hover:shadow-lg hover:ring-blue-200 hover:-translate-y-1"
+      className="group relative overflow-hidden rounded-2xl bg-white p-8 shadow-sm ring-1 ring-purple-100 transition-all duration-300 hover:shadow-lg hover:ring-purple-200 hover:-translate-y-1"
     >
       <div className="relative">
-        <div className={`mb-6 inline-flex h-14 w-14 items-center justify-center rounded-xl ${bgColor} text-2xl text-white shadow-sm transition-all group-hover:shadow-md group-hover:scale-110`}>
-          {icon}
+        <div className={`mb-6 inline-flex h-14 w-14 items-center justify-center rounded-xl ${iconBgClass} text-2xl text-white shadow-sm transition-all ${iconHoverClass} group-hover:shadow-md group-hover:scale-110`}>
+          {icon === 'users' ? (
+            <svg
+              className="h-7 w-7 text-purple-200"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
+              />
+            </svg>
+          ) : (
+            icon
+          )}
         </div>
         <h3 className="mb-3 text-2xl font-bold text-gray-900">{title}</h3>
         <p className="text-sm leading-relaxed text-gray-600">{description}</p>
-        <div className="mt-6 flex items-center text-sm font-semibold text-blue-600 transition-all group-hover:text-blue-700">
-          開く
-          <svg
-            className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2.5}
-              d="M9 5l7 7-7 7"
-            />
-          </svg>
-        </div>
       </div>
     </Link>
   )

@@ -65,20 +65,9 @@ function FeatureCard({
   icon: string
   gradient: string
 }) {
-  // グラデーションを色に変換（すべてブルー系に統一）
-  let bgClass = 'bg-blue-600'
-  let hoverClass = 'hover:bg-blue-700'
-  
-  if (gradient === 'from-blue-500 to-cyan-500') {
-    bgClass = 'bg-blue-600'
-    hoverClass = 'hover:bg-blue-700'
-  } else if (gradient === 'from-purple-500 to-pink-500') {
-    bgClass = 'bg-blue-500'
-    hoverClass = 'hover:bg-blue-600'
-  } else if (gradient === 'from-orange-500 to-red-500') {
-    bgClass = 'bg-blue-700'
-    hoverClass = 'hover:bg-blue-800'
-  }
+  // すべてのアイコンを同じブルー色に統一（薄めのブルー）
+  const bgClass = 'bg-blue-500'
+  const hoverClass = 'hover:bg-blue-600'
 
   return (
     <Link
@@ -91,22 +80,6 @@ function FeatureCard({
         </div>
         <h3 className="mb-3 text-2xl font-bold text-gray-900">{title}</h3>
         <p className="text-sm leading-relaxed text-gray-600">{description}</p>
-        <div className="mt-6 flex items-center text-sm font-semibold text-blue-600 transition-all group-hover:text-blue-700">
-          開く
-          <svg
-            className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2.5}
-              d="M9 5l7 7-7 7"
-            />
-          </svg>
-        </div>
       </div>
     </Link>
   )
