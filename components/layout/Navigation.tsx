@@ -27,6 +27,7 @@ export default function Navigation({ user, isAdmin }: NavigationProps) {
   }
 
   const userEmail = user.email || ''
+  const isAdminPage = pathname.startsWith('/admin')
 
   // サイドバーを閉じる
   const closeSidebar = () => setIsSidebarOpen(false)
@@ -65,9 +66,15 @@ export default function Navigation({ user, isAdmin }: NavigationProps) {
                 </span>
               </Link>
               <div className="flex space-x-1">
-                <NavLink href="/clock" label="打刻" pathname={pathname} />
-                <NavLink href="/shifts" label="シフト" pathname={pathname} />
-                {isAdmin && <NavLink href="/admin" label="管理" pathname={pathname} />}
+                {isAdminPage ? (
+                  <NavLink href="/admin" label="管理" pathname={pathname} />
+                ) : (
+                  <>
+                    <NavLink href="/clock" label="打刻" pathname={pathname} />
+                    <NavLink href="/shifts" label="シフト" pathname={pathname} />
+                    {isAdmin && <NavLink href="/admin" label="管理" pathname={pathname} />}
+                  </>
+                )}
               </div>
             </div>
 
@@ -174,9 +181,15 @@ export default function Navigation({ user, isAdmin }: NavigationProps) {
 
           {/* ナビゲーションリンク */}
           <nav className="flex-1 overflow-y-auto p-4 space-y-2">
-            <SidebarNavLink href="/clock" label="打刻" pathname={pathname} onClick={closeSidebar} />
-            <SidebarNavLink href="/shifts" label="シフト" pathname={pathname} onClick={closeSidebar} />
-            {isAdmin && <SidebarNavLink href="/admin" label="管理" pathname={pathname} onClick={closeSidebar} />}
+            {isAdminPage ? (
+              <SidebarNavLink href="/admin" label="管理" pathname={pathname} onClick={closeSidebar} />
+            ) : (
+              <>
+                <SidebarNavLink href="/clock" label="打刻" pathname={pathname} onClick={closeSidebar} />
+                <SidebarNavLink href="/shifts" label="シフト" pathname={pathname} onClick={closeSidebar} />
+                {isAdmin && <SidebarNavLink href="/admin" label="管理" pathname={pathname} onClick={closeSidebar} />}
+              </>
+            )}
           </nav>
 
           {/* ユーザー情報とログアウト */}
@@ -208,6 +221,23 @@ export default function Navigation({ user, isAdmin }: NavigationProps) {
 
 function NavLink({ href, label, pathname }: { href: string; label: string; pathname: string }) {
   const isActive = pathname === href || pathname.startsWith(href + '/')
+  const isAdminPage = pathname.startsWith('/admin')
+  
+  // 管理画面の場合は紫色のスタイルを使用
+  if (isAdminPage) {
+    return (
+      <Link
+        href={href}
+        className={`relative px-4 py-2 text-sm font-medium rounded-lg transition-all ${
+          isActive
+            ? 'text-purple-700 bg-purple-50'
+            : 'text-gray-600 hover:text-purple-700 hover:bg-purple-50'
+        }`}
+      >
+        {label}
+      </Link>
+    )
+  }
   
   return (
     <Link
@@ -235,6 +265,24 @@ function SidebarNavLink({
   onClick: () => void
 }) {
   const isActive = pathname === href || pathname.startsWith(href + '/')
+  const isAdminPage = pathname.startsWith('/admin')
+  
+  // 管理画面の場合は紫色のスタイルを使用
+  if (isAdminPage) {
+    return (
+      <Link
+        href={href}
+        onClick={onClick}
+        className={`block px-4 py-3 text-base font-medium rounded-lg transition-all ${
+          isActive
+            ? 'text-purple-700 bg-purple-50'
+            : 'text-gray-700 hover:text-purple-700 hover:bg-purple-50'
+        }`}
+      >
+        {label}
+      </Link>
+    )
+  }
   
   return (
     <Link
