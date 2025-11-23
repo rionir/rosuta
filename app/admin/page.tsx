@@ -2,6 +2,9 @@ import { getCurrentUser, isUserAdmin } from '@/lib/actions/auth'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 
+// 認証が必要なページのため、動的レンダリングを明示
+export const dynamic = 'force-dynamic'
+
 export default async function AdminPage() {
   const { data: user } = await getCurrentUser()
 

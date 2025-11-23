@@ -6,6 +6,9 @@ import { getStoreShifts } from '@/lib/actions/shifts'
 import { redirect } from 'next/navigation'
 import ShiftsManagementComponent from '@/components/admin/ShiftsManagementComponent'
 
+// 認証が必要なページのため、動的レンダリングを明示
+export const dynamic = 'force-dynamic'
+
 export default async function ShiftsManagementPage({
   searchParams,
 }: {
