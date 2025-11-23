@@ -350,9 +350,9 @@ export default function AdminCalendarComponent({
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
               </button>
-              <h2 className="text-xl font-bold text-gray-900 tracking-tight">
-                {year}年 {monthNames[month - 1]}
-              </h2>
+            <h2 className="text-xl font-bold text-gray-900 tracking-tight">
+              {year}年 {monthNames[month - 1]}
+            </h2>
               <button
                 onClick={() => {
                   const today = new Date()
@@ -366,23 +366,23 @@ export default function AdminCalendarComponent({
                 今日
               </button>
             </div>
-            <div className="flex items-center space-x-2">
-              <label className="text-sm font-medium text-gray-700">
-                詳細
-              </label>
-              <button
-                type="button"
-                onClick={() => setShowTimeDetails(!showTimeDetails)}
-                className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${
-                  showTimeDetails ? 'bg-blue-600' : 'bg-gray-300'
-                }`}
-              >
-                <span
-                  className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform ${
-                    showTimeDetails ? 'translate-x-5' : 'translate-x-0.5'
+              <div className="flex items-center space-x-2">
+                <label className="text-sm font-medium text-gray-700">
+                  詳細
+                </label>
+                <button
+                  type="button"
+                  onClick={() => setShowTimeDetails(!showTimeDetails)}
+                  className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${
+                    showTimeDetails ? 'bg-blue-600' : 'bg-gray-300'
                   }`}
-                />
-              </button>
+                >
+                  <span
+                    className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform ${
+                      showTimeDetails ? 'translate-x-5' : 'translate-x-0.5'
+                    }`}
+                  />
+                </button>
             </div>
           </div>
         </div>
