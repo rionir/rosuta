@@ -112,11 +112,15 @@ export async function getUserStores(userId: string) {
 export async function getStoreUsers(storeId: number) {
   const supabase = await createClient()
 
+  // user_storesテーブル経由でusersテーブルとJOINして取得
+  // user_storesテーブルには管理者用のSELECTポリシーを追加済み
+  // usersテーブルのRLSポリシー「Admins can view users in their companies」が適用される
+  // ただし、user_stores経由でJOINすることで、RLSポリシーが正しく評価される可能性がある
   const { data, error } = await supabase
     .from('user_stores')
     .select(`
       *,
-      users (
+      users!user_stores_user_id_fkey (
         id,
         name
       )
@@ -126,9 +130,15 @@ export async function getStoreUsers(storeId: number) {
     .order('created_at', { ascending: false })
 
   if (error) {
+    console.error('getStoreUsers error:', error)
+    console.error('getStoreUsers error code:', error.code)
+    console.error('getStoreUsers error message:', error.message)
     return { error: error.message }
   }
 
-  return { data }
+  console.log('getStoreUsers data count:', data?.length || 0)
+  console.log('getStoreUsers data:', data)
+
+  return { data: data || [] }
 }
 

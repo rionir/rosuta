@@ -46,7 +46,8 @@ export async function getAdminCalendarData(
   storeId: number,
   year: number,
   month: number,
-  userId?: string
+  userId?: string,
+  storeUsers?: Array<{ user_id: string; users: { id: string; name: string } | null }>
 ) {
   // 月の開始日と終了日を計算
   const startDate = new Date(year, month - 1, 1)
@@ -71,6 +72,35 @@ export async function getAdminCalendarData(
 
   let shifts = shiftsResult.data || []
   let clockRecords = clockRecordsResult.data || []
+
+  // ユーザー情報をマップに変換（storeUsersから取得）
+  const userMap = new Map<string, { id: string; name: string }>()
+  if (storeUsers) {
+    storeUsers.forEach((item) => {
+      const userInfo = item.users && !Array.isArray(item.users) ? item.users : null
+      if (userInfo && userInfo.id && userInfo.name) {
+        userMap.set(item.user_id, { id: userInfo.id, name: userInfo.name })
+      }
+    })
+  }
+
+  // シフトデータにユーザー情報をマージ
+  shifts = shifts.map((shift: any) => {
+    const userInfo = userMap.get(shift.user_id)
+    return {
+      ...shift,
+      users: userInfo || null,
+    }
+  })
+
+  // 打刻記録データにユーザー情報をマージ
+  clockRecords = clockRecords.map((record: any) => {
+    const userInfo = userMap.get(record.user_id)
+    return {
+      ...record,
+      users: userInfo || null,
+    }
+  })
 
   // 特定ユーザーでフィルター
   if (userId) {
@@ -120,11 +150,12 @@ export async function getUnclockedUsers(
   const supabase = await createClient()
 
   // 指定日のシフトを取得
+  // 外部キーを明示的に指定（user_idを使用）
   const { data: shifts, error: shiftsError } = await supabase
     .from('shifts')
     .select(`
       *,
-      users (
+      users!shifts_user_id_fkey (
         id,
         name
       )
