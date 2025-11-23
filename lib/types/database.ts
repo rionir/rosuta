@@ -147,7 +147,6 @@ export interface Database {
           id: number
           user_id: string
           store_id: number
-          date: string
           scheduled_start: string
           scheduled_end: string
           created_by: string
@@ -158,7 +157,6 @@ export interface Database {
           id?: number
           user_id: string
           store_id: number
-          date: string
           scheduled_start: string
           scheduled_end: string
           created_by: string
@@ -169,7 +167,6 @@ export interface Database {
           id?: number
           user_id?: string
           store_id?: number
-          date?: string
           scheduled_start?: string
           scheduled_end?: string
           created_by?: string

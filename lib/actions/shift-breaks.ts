@@ -5,8 +5,8 @@ import { revalidatePath } from 'next/cache'
 
 export interface CreateShiftBreakInput {
   shiftId: number
-  breakStart: string // HH:mm
-  breakEnd: string // HH:mm
+  breakStart: string // ISO 8601 TIMESTAMP
+  breakEnd: string // ISO 8601 TIMESTAMP
 }
 
 export interface UpdateShiftBreakInput {
