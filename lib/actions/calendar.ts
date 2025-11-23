@@ -16,6 +16,11 @@ export interface CalendarDayData {
       id: number
       name: string
     }
+    shift_breaks?: Array<{
+      id: number
+      break_start: string
+      break_end: string
+    }>
   }>
   clockRecords: Array<{
     id: number
@@ -65,6 +70,32 @@ export async function getCalendarData(
   const shifts = shiftsResult.data || []
   const clockRecords = clockRecordsResult.data || []
 
+  // シフトの休憩情報を取得
+  const shiftIds = shifts.map((s) => s.id)
+  const breaksByShiftId: Record<number, Array<{ id: number; break_start: string; break_end: string }>> = {}
+  
+  if (shiftIds.length > 0) {
+    const supabase = await createClient()
+    const { data: breaks } = await supabase
+      .from('shift_breaks')
+      .select('id, shift_id, break_start, break_end')
+      .in('shift_id', shiftIds)
+      .order('break_start', { ascending: true })
+    
+    if (breaks) {
+      breaks.forEach((b) => {
+        if (!breaksByShiftId[b.shift_id]) {
+          breaksByShiftId[b.shift_id] = []
+        }
+        breaksByShiftId[b.shift_id].push({
+          id: b.id,
+          break_start: b.break_start,
+          break_end: b.break_end,
+        })
+      })
+    }
+  }
+
   // 日付ごとにデータをグループ化
   const calendarData: Record<string, CalendarDayData> = {}
 
@@ -78,7 +109,10 @@ export async function getCalendarData(
         clockRecords: [],
       }
     }
-    calendarData[date].shifts.push(shift)
+    calendarData[date].shifts.push({
+      ...shift,
+      shift_breaks: breaksByShiftId[shift.id] || [],
+    })
   })
 
   // 打刻記録を日付ごとにグループ化
