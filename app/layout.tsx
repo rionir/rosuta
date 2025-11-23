@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import Navigation from "@/components/layout/Navigation";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -25,10 +26,21 @@ export default function RootLayout({
   return (
     <html lang="ja">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-blue-50/30`}
       >
-        {children}
+        <NavigationWrapper>{children}</NavigationWrapper>
       </body>
     </html>
+  );
+}
+
+async function NavigationWrapper({ children }: { children: React.ReactNode }) {
+  // ログインページではナビゲーションを表示しない
+  // 各ページで個別に制御する
+  return (
+    <>
+      <Navigation />
+      <main className="min-h-screen">{children}</main>
+    </>
   );
 }
