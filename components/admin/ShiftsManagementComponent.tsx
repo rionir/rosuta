@@ -91,22 +91,29 @@ export default function ShiftsManagementComponent({
         return
       }
 
-      // 日付と時刻を組み合わせてTIMESTAMPに変換
-      const scheduledStart = `${date}T${scheduledStartTime}:00`
-      const scheduledEnd = `${date}T${scheduledEndTime}:00`
+      // 日付と時刻を組み合わせてTIMESTAMPに変換（JSTとして解釈）
+      // JST (UTC+9) として明示的に指定
+      let scheduledStart = `${date}T${scheduledStartTime}:00+09:00`
+      let scheduledEnd = `${date}T${scheduledEndTime}:00+09:00`
       
       // 夜勤の場合、終了日を翌日に設定
       const startDate = new Date(scheduledStart)
       const endDate = new Date(scheduledEnd)
       if (endDate < startDate) {
-        endDate.setDate(endDate.getDate() + 1)
+        // 翌日の日付を取得
+        const nextDay = new Date(endDate)
+        nextDay.setDate(nextDay.getDate() + 1)
+        const nextDayStr = nextDay.toISOString().split('T')[0]
+        scheduledEnd = `${nextDayStr}T${scheduledEndTime}:00+09:00`
       }
 
+      // JSTのタイムゾーン情報（+09:00）を含めた文字列をそのまま送信
+      // PostgreSQLが自動的にUTCに変換して保存するが、タイムゾーン情報は保持される
       const result = await createShift({
         userId,
         storeId: selectedStore,
-        scheduledStart: startDate.toISOString(),
-        scheduledEnd: endDate.toISOString(),
+        scheduledStart: scheduledStart,
+        scheduledEnd: scheduledEnd,
         createdBy: user.id,
       })
 
@@ -138,21 +145,28 @@ export default function ShiftsManagementComponent({
         return
       }
 
-      // 日付と時刻を組み合わせてTIMESTAMPに変換
-      const scheduledStart = `${date}T${scheduledStartTime}:00`
-      const scheduledEnd = `${date}T${scheduledEndTime}:00`
+      // 日付と時刻を組み合わせてTIMESTAMPに変換（JSTとして解釈）
+      // JST (UTC+9) として明示的に指定
+      let scheduledStart = `${date}T${scheduledStartTime}:00+09:00`
+      let scheduledEnd = `${date}T${scheduledEndTime}:00+09:00`
       
       // 夜勤の場合、終了日を翌日に設定
       const startDate = new Date(scheduledStart)
       const endDate = new Date(scheduledEnd)
       if (endDate < startDate) {
-        endDate.setDate(endDate.getDate() + 1)
+        // 翌日の日付を取得
+        const nextDay = new Date(endDate)
+        nextDay.setDate(nextDay.getDate() + 1)
+        const nextDayStr = nextDay.toISOString().split('T')[0]
+        scheduledEnd = `${nextDayStr}T${scheduledEndTime}:00+09:00`
       }
 
+      // JSTのタイムゾーン情報（+09:00）を含めた文字列をそのまま送信
+      // PostgreSQLが自動的にUTCに変換して保存するが、タイムゾーン情報は保持される
       const result = await updateShift({
         shiftId,
-        scheduledStart: startDate.toISOString(),
-        scheduledEnd: endDate.toISOString(),
+        scheduledStart: scheduledStart,
+        scheduledEnd: scheduledEnd,
       })
 
       if (result.error) {
@@ -490,7 +504,7 @@ export default function ShiftsManagementComponent({
                             id={`date-${shift.id}`}
                             name="date"
                             type="date"
-                            defaultValue={new Date(shift.scheduled_start).toISOString().split('T')[0]}
+                            defaultValue={new Date(shift.scheduled_start).toLocaleDateString('ja-JP', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/\//g, '-')}
                             required
                             className="block w-full rounded-lg border border-gray-300 px-4 py-2.5 shadow-sm transition-all focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
                           />
@@ -504,7 +518,7 @@ export default function ShiftsManagementComponent({
                               id={`scheduledStartTime-${shift.id}`}
                               name="scheduledStartTime"
                               type="time"
-                              defaultValue={new Date(shift.scheduled_start).toTimeString().split(' ')[0].substring(0, 5)}
+                              defaultValue={new Date(shift.scheduled_start).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit', hour12: false })}
                               required
                               className="block w-full rounded-lg border border-gray-300 px-4 py-2.5 shadow-sm transition-all focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
                             />
