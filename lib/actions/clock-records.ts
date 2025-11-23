@@ -95,7 +95,7 @@ export async function updateClockRecord(input: UpdateClockRecordInput) {
   const updates: {
     selected_time?: string
     status?: ClockRecordStatus
-    approved_by?: string
+    approved_by?: string | null
   } = {}
 
   if (input.selectedTime) {
