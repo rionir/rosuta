@@ -263,20 +263,30 @@ export default function AdminCalendarComponent({
   }
 
   // 出勤状況に応じた色を返す
-  const getStatusColor = (status: string) => {
+  const getStatusColor = (status: string, dateStr: string) => {
+    const now = new Date()
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+    const targetDate = new Date(dateStr)
+    const isFuture = targetDate > today
+    
     switch (status) {
       case 'clocked_in':
-        return 'bg-green-100 text-green-800 border-green-200'
+        return 'bg-green-100 text-green-800 border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-800'
       case 'clocked_out':
-        return 'bg-blue-100 text-blue-800 border-blue-200'
+        // 退勤済みはグレー
+        return 'bg-gray-100 text-gray-700 border-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600'
       case 'on_break':
-        return 'bg-yellow-100 text-yellow-800 border-yellow-200'
+        return 'bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-300 dark:border-yellow-800'
       case 'late_or_not_clocked':
-        return 'bg-red-100 text-red-800 border-red-200'
+        return 'bg-red-100 text-red-800 border-red-200 dark:bg-red-900/30 dark:text-red-300 dark:border-red-800'
       case 'not_clocked':
-        return 'bg-gray-100 text-gray-600 border-gray-200'
+        // 未来の予定はブルー、過去の未出勤はグレー
+        if (isFuture) {
+          return 'bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800'
+        }
+        return 'bg-gray-100 text-gray-700 border-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600'
       default:
-        return 'bg-gray-100 text-gray-600 border-gray-200'
+        return 'bg-gray-100 text-gray-700 border-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600'
     }
   }
 
@@ -464,22 +474,20 @@ export default function AdminCalendarComponent({
                         setSelectedDate(selectedDate === dateStr ? null : dateStr)
                       }
                     }}
-                    className={`min-h-[90px] border-r border-b border-gray-100 p-0.5 transition-all ${
+                    className={`min-h-[90px] border-r border-b border-gray-100 p-0.5 transition-all dark:border-gray-700 ${
                       !dateInfo.isCurrentMonth
-                        ? 'bg-gray-50'
-                        : isToday
-                        ? 'bg-blue-50'
-                        : 'bg-white'
+                        ? 'bg-gray-50 dark:bg-gray-900'
+                        : 'bg-white dark:bg-gray-800'
                     } ${dateInfo.isCurrentMonth && selectedDate === dateStr ? 'ring-2 ring-blue-500 ring-inset' : ''} ${
                       dateInfo.isCurrentMonth ? 'cursor-pointer' : 'cursor-default'
                     }`}
                   >
                     <div className={`mb-0.5 px-1 text-xs font-medium ${
                       !dateInfo.isCurrentMonth
-                        ? 'text-gray-400'
+                        ? 'text-gray-400 dark:text-gray-600'
                         : isToday
-                        ? 'text-blue-700 font-semibold'
-                        : 'text-gray-900'
+                        ? 'flex items-center justify-center w-6 h-6 rounded-full bg-blue-600 text-white font-semibold dark:bg-blue-500'
+                        : 'text-gray-900 dark:text-gray-100'
                     }`}>
                       {dateInfo.day}
                     </div>
@@ -488,7 +496,7 @@ export default function AdminCalendarComponent({
                         {/* シフトがあるユーザー */}
                         {sortedShifts.map((shift) => {
                           const status = getShiftStatus(shift, dayData.clockRecords, dateStr)
-                          const statusColor = getStatusColor(status)
+                          const statusColor = getStatusColor(status, dateStr)
                           return (
                             <div
                               key={shift.id}

@@ -36,6 +36,11 @@ interface CalendarDayData {
       id: number
       name: string
     }
+    shift_breaks?: Array<{
+      id: number
+      break_start: string
+      break_end: string
+    }>
   }>
   clockRecords: Array<{
     id: number
@@ -88,6 +93,50 @@ export default function CalendarComponent({
   const lastDay = new Date(year, month, 0)
   const daysInMonth = lastDay.getDate()
   const startingDayOfWeek = firstDay.getDay()
+  
+  // 前月の最終日を計算
+  const prevMonthLastDay = new Date(year, month - 1, 0)
+  const prevMonthDays = prevMonthLastDay.getDate()
+  
+  // カレンダーに表示する全42日（6週間）を計算
+  const totalDays = 42
+  const daysToShow: Array<{
+    day: number
+    month: number
+    year: number
+    isCurrentMonth: boolean
+  }> = []
+  
+  // 前月の日付を追加
+  for (let i = startingDayOfWeek - 1; i >= 0; i--) {
+    daysToShow.push({
+      day: prevMonthDays - i,
+      month: month - 1,
+      year: month === 1 ? year - 1 : year,
+      isCurrentMonth: false,
+    })
+  }
+  
+  // 今月の日付を追加
+  for (let day = 1; day <= daysInMonth; day++) {
+    daysToShow.push({
+      day,
+      month,
+      year,
+      isCurrentMonth: true,
+    })
+  }
+  
+  // 次の月の日付を追加（42日になるまで）
+  const remainingDays = totalDays - daysToShow.length
+  for (let day = 1; day <= remainingDays; day++) {
+    daysToShow.push({
+      day,
+      month: month + 1,
+      year: month === 12 ? year + 1 : year,
+      isCurrentMonth: false,
+    })
+  }
 
   // 前月・次月のナビゲーション
   const handlePrevMonth = () => {
@@ -107,22 +156,132 @@ export default function CalendarComponent({
   }
 
   // 日付ごとのデータを取得
-  const getDayData = (day: number): CalendarDayData | undefined => {
-    const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`
+  const getDayData = (day: number, targetMonth: number, targetYear: number): CalendarDayData | undefined => {
+    const dateStr = `${targetYear}-${String(targetMonth).padStart(2, '0')}-${String(day).padStart(2, '0')}`
     return calendarData.find((d) => d.date === dateStr)
   }
 
-  // 日付の状態を判定（色分け用）
-  const getDayStatus = (dayData: CalendarDayData | undefined) => {
-    if (!dayData) return 'none'
+  // 休憩時間を計算（分単位）
+  const calculateBreakMinutes = (breaks: Array<{ break_start: string; break_end: string }> | undefined): number => {
+    if (!breaks || breaks.length === 0) return 0
     
-    const hasShift = dayData.shifts.length > 0
+    let totalMinutes = 0
+    breaks.forEach((b) => {
+      const start = new Date(b.break_start)
+      const end = new Date(b.break_end)
+      totalMinutes += (end.getTime() - start.getTime()) / (1000 * 60)
+    })
+    return totalMinutes
+  }
+
+  // 実労時間を計算（分単位）
+  const calculateActualWorkMinutes = (clockRecords: CalendarDayData['clockRecords']): { workMinutes: number; clockInTime: Date | null; clockOutTime: Date | null } => {
+    const approvedRecords = clockRecords.filter((r) => r.status === 'approved')
+    const sorted = approvedRecords.sort((a, b) => a.selected_time.localeCompare(b.selected_time))
+    
+    let clockInTime: Date | null = null
+    let clockOutTime: Date | null = null
+    let breakStartTime: Date | null = null
+    let breakMinutes = 0
+    
+    sorted.forEach((record) => {
+      const time = new Date(record.selected_time)
+      
+      switch (record.type) {
+        case 'clock_in':
+          clockInTime = time
+          break
+        case 'clock_out':
+          clockOutTime = time
+          break
+        case 'break_start':
+          breakStartTime = time
+          break
+        case 'break_end':
+          if (breakStartTime) {
+            breakMinutes += (time.getTime() - breakStartTime.getTime()) / (1000 * 60)
+            breakStartTime = null
+          }
+          break
+      }
+    })
+    
+    if (clockInTime !== null && clockOutTime !== null) {
+      const workMinutes = ((clockOutTime as Date).getTime() - (clockInTime as Date).getTime()) / (1000 * 60) - breakMinutes
+      return { workMinutes, clockInTime, clockOutTime }
+    }
+    
+    return { workMinutes: 0, clockInTime, clockOutTime }
+  }
+
+  // 時間を「〇h〇m」形式にフォーマット
+  const formatWorkTime = (minutes: number): string => {
+    const hours = Math.floor(minutes / 60)
+    const mins = Math.round(minutes % 60)
+    if (hours === 0) {
+      return `${mins}m`
+    }
+    if (mins === 0) {
+      return `${hours}h`
+    }
+    return `${hours}h${mins}m`
+  }
+
+  // 日付の状態を判定（色分け用）
+  const getDayStatus = (dayData: CalendarDayData | undefined, dateStr: string): 'future' | 'working' | 'completed' | 'missing_clock_in' | 'missing_clock_out' | 'none' => {
+    if (!dayData || dayData.shifts.length === 0) return 'none'
+    
+    const shift = dayData.shifts[0]
+    const now = new Date()
+    const shiftStart = new Date(shift.scheduled_start)
+    const shiftEnd = new Date(shift.scheduled_end)
+    const date = new Date(dateStr)
+    
     const hasClockIn = dayData.clockRecords.some((r) => r.type === 'clock_in' && r.status === 'approved')
     const hasClockOut = dayData.clockRecords.some((r) => r.type === 'clock_out' && r.status === 'approved')
     
-    if (hasClockIn && hasClockOut) return 'completed'
-    if (hasClockIn) return 'working'
-    if (hasShift) return 'scheduled'
+    // 今日の日付を取得（時刻を00:00:00に設定）
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+    const targetDate = new Date(date.getFullYear(), date.getMonth(), date.getDate())
+    
+    // 過去の日付
+    if (targetDate < today) {
+      if (hasClockIn && hasClockOut) {
+        return 'completed'
+      }
+      if (hasClockIn && !hasClockOut) {
+        return 'missing_clock_out'
+      }
+      if (!hasClockIn && now > shiftStart) {
+        return 'missing_clock_in'
+      }
+      // 過去の日付でシフトがあるが打刻がない場合も未来として扱う（既に過ぎた場合はmissing_clock_in）
+      return 'future'
+    }
+    
+    // 未来の日付
+    if (targetDate > today) {
+      return 'future'
+    }
+    
+    // 今日
+    if (hasClockIn && hasClockOut) {
+      return 'completed'
+    }
+    if (hasClockIn && !hasClockOut) {
+      // 退勤予定時間を過ぎているかチェック
+      if (now > shiftEnd) {
+        return 'missing_clock_out'
+      }
+      return 'working'
+    }
+    if (!hasClockIn && now > shiftStart) {
+      return 'missing_clock_in'
+    }
+    if (!hasClockIn) {
+      return 'future'
+    }
+    
     return 'none'
   }
 
@@ -137,19 +296,31 @@ export default function CalendarComponent({
         <CalendarStoreSelect stores={stores} selectedStoreId={selectedStoreId} />
       </div>
 
-      <div className="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-blue-100">
-        <div className="border-b border-blue-100 bg-blue-50 px-8 py-7">
+      <div className="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-blue-100 dark:bg-gray-800 dark:ring-gray-700">
+        <div className="bg-blue-50 px-6 py-4 border-b border-blue-100 dark:bg-gray-700 dark:border-gray-600">
           <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-bold text-gray-900 tracking-tight">
-              {year}年 {monthNames[month - 1]}
-            </h2>
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-3">
               <button
                 onClick={handlePrevMonth}
-                className="rounded-lg px-3 py-2 text-sm font-medium text-gray-700 transition-all hover:bg-blue-100 hover:text-blue-700"
+                className="flex h-8 w-8 items-center justify-center rounded-lg text-gray-700 transition-all hover:bg-blue-100 hover:text-blue-700 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-gray-100"
+                aria-label="前月"
               >
-                ← 前月
+                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
               </button>
+              <button
+                onClick={handleNextMonth}
+                className="flex h-8 w-8 items-center justify-center rounded-lg text-gray-700 transition-all hover:bg-blue-100 hover:text-blue-700 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-gray-100"
+                aria-label="次月"
+              >
+                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+              <h2 className="text-xl font-bold text-gray-900 tracking-tight dark:text-gray-100">
+                {year}年 {monthNames[month - 1]}
+              </h2>
               <button
                 onClick={() => {
                   const today = new Date()
@@ -158,111 +329,172 @@ export default function CalendarComponent({
                   params.set('month', (today.getMonth() + 1).toString())
                   router.push(`/shifts?${params.toString()}`)
                 }}
-                className="rounded-lg px-3 py-2 text-sm font-medium text-gray-700 transition-all hover:bg-blue-100 hover:text-blue-700"
+                className="rounded-lg px-3 py-1.5 text-sm font-medium text-gray-700 transition-all hover:bg-blue-100 hover:text-blue-700 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-gray-100"
               >
-                今月
-              </button>
-              <button
-                onClick={handleNextMonth}
-                className="rounded-lg px-3 py-2 text-sm font-medium text-gray-700 transition-all hover:bg-blue-100 hover:text-blue-700"
-              >
-                次月 →
+                今日
               </button>
             </div>
           </div>
         </div>
 
-        <div className="p-8">
+        <div className="p-1">
           {isLoading ? (
             <div className="flex items-center justify-center py-12">
-              <div className="text-gray-500">読み込み中...</div>
+              <div className="text-gray-500 dark:text-gray-400">読み込み中...</div>
             </div>
           ) : (
-            <div className="grid grid-cols-7 gap-2">
+            <div className="grid grid-cols-7 gap-0 border border-gray-100 rounded-b-2xl overflow-hidden dark:border-gray-700">
               {/* 曜日ヘッダー */}
               {['日', '月', '火', '水', '木', '金', '土'].map((day) => (
                 <div
                   key={day}
-                  className="py-2 text-center text-sm font-semibold text-gray-700"
+                  className="py-1 text-center text-xs font-medium text-gray-600 border-b border-gray-100 dark:text-gray-400 dark:border-gray-700"
                 >
                   {day}
                 </div>
               ))}
 
-              {/* 空白セル（月初め） */}
-              {Array.from({ length: startingDayOfWeek }).map((_, i) => (
-                <div key={`empty-${i}`} className="aspect-square" />
-              ))}
-
-              {/* 日付セル */}
-              {Array.from({ length: daysInMonth }).map((_, i) => {
-                const day = i + 1
-                const dayData = getDayData(day)
-                const status = getDayStatus(dayData)
+              {/* 日付セル（前月・今月・次月を含む） */}
+              {daysToShow.map((dateInfo, i) => {
+                const dateStr = `${dateInfo.year}-${String(dateInfo.month).padStart(2, '0')}-${String(dateInfo.day).padStart(2, '0')}`
+                const dayData = dateInfo.isCurrentMonth ? getDayData(dateInfo.day, dateInfo.month, dateInfo.year) : null
+                const status = dayData ? getDayStatus(dayData, dateStr) : 'none'
                 const isToday =
-                  new Date().getFullYear() === year &&
-                  new Date().getMonth() + 1 === month &&
-                  new Date().getDate() === day
+                  new Date().getFullYear() === dateInfo.year &&
+                  new Date().getMonth() + 1 === dateInfo.month &&
+                  new Date().getDate() === dateInfo.day
+
+                // シフト情報を取得
+                const shift = dayData?.shifts[0]
+                const shiftBreaks = shift?.shift_breaks || []
+                
+                // 打刻記録から実労時間を計算
+                const workTimeResult = dayData
+                  ? calculateActualWorkMinutes(dayData.clockRecords)
+                  : { workMinutes: 0, clockInTime: null as Date | null, clockOutTime: null as Date | null }
+                const { workMinutes, clockInTime, clockOutTime } = workTimeResult
+
+                // 予定時間を計算（休憩を除く）
+                let scheduledWorkMinutes = 0
+                if (shift) {
+                  const shiftStart = new Date(shift.scheduled_start)
+                  const shiftEnd = new Date(shift.scheduled_end)
+                  const totalMinutes = (shiftEnd.getTime() - shiftStart.getTime()) / (1000 * 60)
+                  const breakMinutes = calculateBreakMinutes(shiftBreaks)
+                  scheduledWorkMinutes = totalMinutes - breakMinutes
+                }
+
+                // ステータスに応じた色を決定
+                const getStatusColor = () => {
+                  switch (status) {
+                    case 'future':
+                      return 'bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800'
+                    case 'working':
+                      return 'bg-green-100 text-green-800 border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-800'
+                    case 'completed':
+                      return 'bg-gray-100 text-gray-700 border-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600'
+                    case 'missing_clock_in':
+                    case 'missing_clock_out':
+                      return 'bg-red-100 text-red-800 border-red-200 dark:bg-red-900/30 dark:text-red-300 dark:border-red-800'
+                    default:
+                      return 'bg-gray-100 text-gray-700 border-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600'
+                  }
+                }
 
                 return (
                   <div
-                    key={day}
-                    className={`min-h-[100px] rounded-lg border-2 p-2 transition-all ${
-                      isToday
-                        ? 'border-blue-600 bg-blue-50 shadow-sm'
-                        : status === 'completed'
-                        ? 'border-green-200 bg-green-50'
-                        : status === 'working'
-                        ? 'border-blue-200 bg-blue-50'
-                        : status === 'scheduled'
-                        ? 'border-gray-200 bg-gray-50'
-                        : 'border-gray-100 bg-white'
+                    key={`${dateInfo.year}-${dateInfo.month}-${dateInfo.day}-${i}`}
+                    className={`min-h-[90px] border-r border-b border-gray-100 p-0.5 transition-all dark:border-gray-700 ${
+                      !dateInfo.isCurrentMonth
+                        ? 'bg-gray-50 dark:bg-gray-900'
+                        : 'bg-white dark:bg-gray-800'
                     }`}
                   >
-                    <div className={`mb-1 text-sm font-semibold ${
-                      isToday ? 'text-blue-700' : 'text-gray-900'
+                    <div className={`mb-0.5 px-1 text-xs font-medium ${
+                      !dateInfo.isCurrentMonth
+                        ? 'text-gray-400 dark:text-gray-600'
+                        : isToday
+                        ? 'flex items-center justify-center w-6 h-6 rounded-full bg-blue-600 text-white font-semibold dark:bg-blue-500'
+                        : 'text-gray-900 dark:text-gray-100'
                     }`}>
-                      {day}
+                      {dateInfo.day}
                     </div>
-                    {dayData && (
-                      <div className="space-y-1">
-                        {dayData.shifts.length > 0 && (
-                          <div className="rounded bg-white/60 px-1.5 py-0.5 text-xs font-medium text-gray-700">
-                            📅 {new Date(dayData.shifts[0].scheduled_start).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })}〜
-                            {new Date(dayData.shifts[0].scheduled_end).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })}
-                            {dayData.shifts[0].company_stores && (
-                              <span className="ml-1 text-gray-500">
-                                ({dayData.shifts[0].company_stores.name})
+                    {dayData && shift && (
+                      <div className="flex flex-col gap-0.5 px-0.5">
+                        {status === 'future' && (
+                          // 未来の予定：シフト時間と実労時間（休憩除く）
+                          <div className={`w-full rounded px-1 py-0.5 text-xs font-medium ${getStatusColor()}`}>
+                            <span className="block whitespace-normal break-words">
+                              {new Date(shift.scheduled_start).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })}〜
+                              {new Date(shift.scheduled_end).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })}
+                              <span className="ml-1 text-xs">
+                                ({formatWorkTime(scheduledWorkMinutes)})
                               </span>
-                            )}
+                              {shift.company_stores && (
+                                <span className="ml-1 text-xs opacity-80">
+                                  {shift.company_stores.name}
+                                </span>
+                              )}
+                            </span>
                           </div>
                         )}
-                        {dayData.clockRecords
-                          .filter((r) => r.status === 'approved' || r.status === 'pending')
-                          .sort((a, b) => a.selected_time.localeCompare(b.selected_time))
-                          .map((record) => (
-                            <div
-                              key={record.id}
-                              className={`rounded px-1.5 py-0.5 text-xs ${
-                                record.status === 'pending'
-                                  ? 'bg-yellow-100 text-yellow-800'
-                                  : record.type === 'clock_in'
-                                  ? 'bg-blue-100 text-blue-800'
-                                  : record.type === 'clock_out'
-                                  ? 'bg-green-100 text-green-800'
-                                  : 'bg-gray-100 text-gray-800'
-                              }`}
-                            >
-                              {record.type === 'clock_in' && '⏰ 出勤'}
-                              {record.type === 'clock_out' && '🏠 退勤'}
-                              {record.type === 'break_start' && '☕ 休憩開始'}
-                              {record.type === 'break_end' && '⏰ 休憩終了'}
-                              {record.status === 'pending' && ' (承認待ち)'}
-                              <span className="ml-1 text-gray-600">
-                                {record.selected_time.substring(11, 16)}
+                        {status === 'working' && (
+                          // 勤務中：シフトの予定時間（色を変える）
+                          <div className={`w-full rounded px-1 py-0.5 text-xs font-medium ${getStatusColor()}`}>
+                            <span className="block whitespace-normal break-words">
+                              {new Date(shift.scheduled_start).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })}〜
+                              {new Date(shift.scheduled_end).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })}
+                              <span className="ml-1 text-xs">
+                                ({formatWorkTime(scheduledWorkMinutes)})
+                              </span>
+                              {shift.company_stores && (
+                                <span className="ml-1 text-xs opacity-80">
+                                  {shift.company_stores.name}
+                                </span>
+                              )}
+                            </span>
+                          </div>
+                        )}
+                        {status === 'completed' && (
+                          // 過去で退勤済み：実際の出勤時間〜退勤時間と実労時間
+                          clockInTime && clockOutTime && (
+                            <div className={`w-full rounded px-1 py-0.5 text-xs font-medium ${getStatusColor()}`}>
+                              <span className="block whitespace-normal break-words">
+                                {clockInTime.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })}〜
+                                {clockOutTime.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })}
+                                <span className="ml-1 text-xs">
+                                  ({formatWorkTime(workMinutes)})
+                                </span>
+                                {shift.company_stores && (
+                                  <span className="ml-1 text-xs opacity-80">
+                                    {shift.company_stores.name}
+                                  </span>
+                                )}
                               </span>
                             </div>
-                          ))}
+                          )
+                        )}
+                        {(status === 'missing_clock_in' || status === 'missing_clock_out') && (
+                          // 打刻忘れ：警告色で表示
+                          <div className={`w-full rounded px-1 py-0.5 text-xs font-medium ${getStatusColor()}`}>
+                            <span className="block whitespace-normal break-words">
+                              {status === 'missing_clock_in' && '出勤打刻なし'}
+                              {status === 'missing_clock_out' && '退勤打刻なし'}
+                              {shift && (
+                                <>
+                                  <br />
+                                  {new Date(shift.scheduled_start).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })}〜
+                                  {new Date(shift.scheduled_end).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })}
+                                  {shift.company_stores && (
+                                    <span className="ml-1 text-xs opacity-80">
+                                      {shift.company_stores.name}
+                                    </span>
+                                  )}
+                                </>
+                              )}
+                            </span>
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
