@@ -5,6 +5,7 @@ import { getUserShifts } from './shifts'
 import { getUserClockRecords } from './clock-records'
 import { getStoreShifts } from './shifts'
 import { getStoreClockRecords } from './clock-records'
+import { getStoreUsers } from './user-stores'
 
 export interface WorkSummaryDay {
   date: string
@@ -308,9 +309,10 @@ export async function getStoreWorkSummary(
   const startDateStr = startDate.toISOString().split('T')[0]
   const endDateStr = endDate.toISOString().split('T')[0]
 
-  const [shiftsResult, clockRecordsResult] = await Promise.all([
+  const [shiftsResult, clockRecordsResult, storeUsersResult] = await Promise.all([
     getStoreShifts(storeId, startDateStr, endDateStr),
     getStoreClockRecords(storeId, `${startDateStr}T00:00:00`, `${endDateStr}T23:59:59`),
+    getStoreUsers(storeId),
   ])
 
   if (shiftsResult.error) {
@@ -321,8 +323,26 @@ export async function getStoreWorkSummary(
     return { error: clockRecordsResult.error }
   }
 
+  if (storeUsersResult.error) {
+    return { error: storeUsersResult.error }
+  }
+
   let shifts = shiftsResult.data || []
   let clockRecords = clockRecordsResult.data || []
+  const storeUsers = storeUsersResult.data || []
+
+  // ユーザー情報をマップに変換
+  const userMap = new Map<string, { id: string; last_name: string; first_name: string }>()
+  storeUsers.forEach((item) => {
+    const userInfo = item.users && !Array.isArray(item.users) ? item.users : null
+    if (userInfo && userInfo.id && userInfo.last_name) {
+      userMap.set(item.user_id, {
+        id: userInfo.id,
+        last_name: userInfo.last_name,
+        first_name: userInfo.first_name,
+      })
+    }
+  })
 
   // 特定ユーザーでフィルター
   if (userId) {
@@ -342,7 +362,8 @@ export async function getStoreWorkSummary(
   // シフトから予定時間を集計
   shifts.forEach((shift) => {
     const userId = shift.user_id
-    const userName = shift.users ? `${shift.users.last_name} ${shift.users.first_name}`.trim() || '不明' : '不明'
+    const userInfo = userMap.get(userId)
+    const userName = userInfo ? `${userInfo.last_name}${userInfo.first_name}`.trim() || '不明' : '不明'
 
     if (!userSummaries[userId]) {
       userSummaries[userId] = {
@@ -372,9 +393,13 @@ export async function getStoreWorkSummary(
 
   Object.entries(recordsByUser).forEach(([userId, records]) => {
     if (!userSummaries[userId]) {
+      // usersが配列の場合、最初の要素を取得（1対1の関係なので）
+      const recordUser = records[0]?.users ? (Array.isArray(records[0].users) ? records[0].users[0] : records[0].users) : null
+      const userInfo = userMap.get(userId) || recordUser
+      const userName = userInfo ? `${userInfo.last_name}${userInfo.first_name}`.trim() || '不明' : '不明'
       userSummaries[userId] = {
         userId,
-        userName: records[0]?.users ? `${records[0].users.last_name} ${records[0].users.first_name}`.trim() || '不明' : '不明',
+        userName,
         scheduledHours: 0,
         actualHours: 0,
         breakMinutes: 0,
