@@ -4,7 +4,7 @@ import { useTheme } from 'next-themes'
 import { useEffect, useState } from 'react'
 
 export function ThemeToggle() {
-  const { theme, setTheme } = useTheme()
+  const { theme, setTheme, resolvedTheme } = useTheme()
   const [mounted, setMounted] = useState(false)
 
   // マウント後にレンダリング（ハイドレーションエラーを防ぐ）
@@ -35,11 +35,18 @@ export function ThemeToggle() {
     )
   }
 
-  const isDark = theme === 'dark'
+  // resolvedThemeを使用して現在のテーマを取得
+  const currentTheme = resolvedTheme || theme || 'light'
+  const isDark = currentTheme === 'dark'
+
+  const handleToggle = () => {
+    const newTheme = isDark ? 'light' : 'dark'
+    setTheme(newTheme)
+  }
 
   return (
     <button
-      onClick={() => setTheme(isDark ? 'light' : 'dark')}
+      onClick={handleToggle}
       className="p-2 rounded-lg text-gray-600 hover:bg-blue-50 hover:text-blue-700 transition-all dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-gray-100"
       aria-label={isDark ? 'ライトモードに切り替え' : 'ダークモードに切り替え'}
     >

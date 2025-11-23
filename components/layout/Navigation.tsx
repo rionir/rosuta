@@ -86,7 +86,7 @@ export default function Navigation({ user, isAdmin }: NavigationProps) {
               {user.profile?.last_name && user.profile?.first_name 
                 ? `${user.profile.last_name} ${user.profile.first_name}` 
                 : userEmail}
-            </span>
+              </span>
             <form action={async () => {
               await signOut()
             }}>

@@ -30,7 +30,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-blue-50/30 dark:bg-gray-900`}
       >
         <ThemeProvider>
-          <NavigationWrapper>{children}</NavigationWrapper>
+        <NavigationWrapper>{children}</NavigationWrapper>
         </ThemeProvider>
       </body>
     </html>
