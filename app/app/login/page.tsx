@@ -6,15 +6,11 @@ import LoginForm from '@/components/auth/LoginForm'
 export const dynamic = 'force-dynamic'
 
 export default async function LoginPage() {
-  // ログインページでは認証チェックをスキップ（認証が必要な場合はmiddlewareで処理）
-  // try {
-  //   const { data: user } = await getCurrentUser()
-  //   if (user) {
-  //     redirect('/')
-  //   }
-  // } catch (error) {
-  //   console.error('Login page error:', error)
-  // }
+  // 既にログインしている場合はダッシュボードにリダイレクト
+  const { data: user } = await getCurrentUser()
+  if (user) {
+    redirect('/app/dashboard')
+  }
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-blue-50/50 p-4 dark:bg-gray-900">

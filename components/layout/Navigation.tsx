@@ -22,14 +22,6 @@ export default function Navigation({ user, isAdmin }: NavigationProps) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const pathname = usePathname()
 
-  // ログインページではナビゲーションを表示しない
-  if (!user || pathname === '/login') {
-    return null
-  }
-
-  const userEmail = user.email || ''
-  const isAdminPage = pathname.startsWith('/admin')
-
   // サイドバーを閉じる
   const closeSidebar = () => setIsSidebarOpen(false)
 
@@ -50,6 +42,15 @@ export default function Navigation({ user, isAdmin }: NavigationProps) {
     }
   }, [isSidebarOpen])
 
+  // ログインページやランディングページではナビゲーションを表示しない
+  // Hooksの後に配置することで、Hooksの順序を保つ
+  if (!user || pathname === '/app/login' || pathname === '/') {
+    return null
+  }
+
+  const userEmail = user.email || ''
+  const isAdminPage = pathname.startsWith('/app/admin')
+
   return (
     <>
       {/* デスクトップ: 上部ナビゲーション */}
@@ -58,7 +59,7 @@ export default function Navigation({ user, isAdmin }: NavigationProps) {
         <div className="flex h-16 items-center justify-between">
           {/* Logo and Navigation Links */}
           <div className="flex items-center space-x-10">
-            <Link href="/" className="flex items-center space-x-2.5 group">
+            <Link href="/app/dashboard" className="flex items-center space-x-2.5 group">
               <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-600 shadow-sm transition-all group-hover:bg-blue-700 group-hover:shadow-md dark:bg-blue-500">
                 <span className="text-lg font-bold text-white">ロ</span>
               </div>
@@ -68,12 +69,12 @@ export default function Navigation({ user, isAdmin }: NavigationProps) {
             </Link>
               <div className="flex space-x-1">
                 {isAdminPage ? (
-                  <NavLink href="/admin" label="管理" pathname={pathname} />
+                  <NavLink href="/app/admin" label="管理" pathname={pathname} />
                 ) : (
                   <>
-                    <NavLink href="/clock" label="打刻" pathname={pathname} />
-                    <NavLink href="/shifts" label="シフト" pathname={pathname} />
-                    {isAdmin && <NavLink href="/admin" label="管理" pathname={pathname} />}
+                    <NavLink href="/app/clock" label="打刻" pathname={pathname} />
+                    <NavLink href="/app/shifts" label="シフト" pathname={pathname} />
+                    {isAdmin && <NavLink href="/app/admin" label="管理" pathname={pathname} />}
                   </>
                 )}
             </div>
@@ -105,7 +106,7 @@ export default function Navigation({ user, isAdmin }: NavigationProps) {
       {/* モバイル: 上部バー（ハンバーガーメニュー付き） */}
       <nav className="md:hidden sticky top-0 z-50 border-b border-blue-100 bg-white/95 backdrop-blur-lg shadow-sm dark:border-gray-700 dark:bg-gray-800/95">
         <div className="flex h-16 items-center justify-between px-4">
-          <Link href="/" className="flex items-center space-x-2.5">
+          <Link href="/app/dashboard" className="flex items-center space-x-2.5">
             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-600 shadow-sm">
               <span className="text-lg font-bold text-white">ロ</span>
             </div>
@@ -185,12 +186,12 @@ export default function Navigation({ user, isAdmin }: NavigationProps) {
           {/* ナビゲーションリンク */}
           <nav className="flex-1 overflow-y-auto p-4 space-y-2">
             {isAdminPage ? (
-              <SidebarNavLink href="/admin" label="管理" pathname={pathname} onClick={closeSidebar} />
+              <SidebarNavLink href="/app/admin" label="管理" pathname={pathname} onClick={closeSidebar} />
             ) : (
               <>
-                <SidebarNavLink href="/clock" label="打刻" pathname={pathname} onClick={closeSidebar} />
-                <SidebarNavLink href="/shifts" label="シフト" pathname={pathname} onClick={closeSidebar} />
-                {isAdmin && <SidebarNavLink href="/admin" label="管理" pathname={pathname} onClick={closeSidebar} />}
+                <SidebarNavLink href="/app/clock" label="打刻" pathname={pathname} onClick={closeSidebar} />
+                <SidebarNavLink href="/app/shifts" label="シフト" pathname={pathname} onClick={closeSidebar} />
+                {isAdmin && <SidebarNavLink href="/app/admin" label="管理" pathname={pathname} onClick={closeSidebar} />}
               </>
             )}
           </nav>

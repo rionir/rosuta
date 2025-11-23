@@ -27,7 +27,7 @@ export default function NotFound() {
             ホームに戻る
           </Link>
           <Link
-            href="/login"
+            href="/app/login"
             className="inline-flex items-center justify-center rounded-xl border border-blue-600 bg-white px-6 py-3 text-base font-semibold text-blue-600 transition-all hover:bg-blue-50"
           >
             ログインページへ

@@ -1,23 +1,30 @@
-import { getCurrentUser } from '@/lib/actions/auth'
+import { getCurrentUser, isUserAdmin } from '@/lib/actions/auth'
 import { getUserStores } from '@/lib/actions/user-stores'
+import { getStoreUsers } from '@/lib/actions/user-stores'
 import { redirect } from 'next/navigation'
-import WorkSummaryComponent from '@/components/summary/WorkSummaryComponent'
+import AdminCalendarComponent from '@/components/admin/AdminCalendarComponent'
 
 // 認証が必要なページのため、動的レンダリングを明示
 export const dynamic = 'force-dynamic'
 
-export default async function WorkSummaryPage({
+export default async function AdminCalendarPage({
   searchParams,
 }: {
-  searchParams: Promise<{ year?: string; month?: string; storeId?: string; period?: 'day' | 'week' | 'month' }>
+  searchParams: Promise<{ year?: string; month?: string; storeId?: string; userId?: string }>
 }) {
   const { data: user } = await getCurrentUser()
 
   if (!user) {
-    redirect('/login')
+    redirect('/app/login')
   }
 
-  // ユーザーが所属する店舗一覧を取得
+  // 管理者権限チェック
+  const isAdmin = await isUserAdmin(user.id)
+  if (!isAdmin) {
+    redirect('/app/dashboard')
+  }
+
+  // 管理者が管理できる店舗一覧を取得
   const { data: userStores } = await getUserStores(user.id)
 
   if (!userStores || userStores.length === 0) {
@@ -29,7 +36,7 @@ export default async function WorkSummaryPage({
           </div>
           <div className="p-8">
             <p className="text-gray-700 leading-relaxed">
-              勤務実績を確認するには、まず管理者に店舗への所属を依頼してください。
+              カレンダーを確認するには、まず店舗に所属する必要があります。
             </p>
           </div>
         </div>
@@ -37,25 +44,32 @@ export default async function WorkSummaryPage({
     )
   }
 
-  // URLパラメータから年月、店舗ID、期間を取得
+  // URLパラメータから年月、店舗ID、ユーザーIDを取得
   const params = await searchParams
   const today = new Date()
   const year = params.year ? parseInt(params.year) : today.getFullYear()
   const month = params.month ? parseInt(params.month) : today.getMonth() + 1
-  const selectedStoreId = params.storeId ? parseInt(params.storeId) : undefined
-  const period = params.period || 'month'
+  const selectedStoreId = params.storeId ? parseInt(params.storeId) : (userStores[0]?.store_id as number)
+  const selectedUserId = params.userId || undefined
+
+  // 選択された店舗のユーザー一覧を取得
+  const { data: storeUsers } = selectedStoreId
+    ? await getStoreUsers(selectedStoreId)
+    : { data: null }
 
   return (
-    <WorkSummaryComponent
+    <AdminCalendarComponent
       user={user}
       stores={userStores}
+      storeUsers={storeUsers || []}
       year={year}
       month={month}
       selectedStoreId={selectedStoreId}
-      period={period}
+      selectedUserId={selectedUserId}
     />
   )
 }
+
 
 
 

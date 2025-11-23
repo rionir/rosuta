@@ -17,13 +17,13 @@ export default async function ShiftsManagementPage({
   const { data: user } = await getCurrentUser()
 
   if (!user) {
-    redirect('/login')
+    redirect('/app/login')
   }
 
   // 管理者権限チェック
   const isAdmin = await isUserAdmin(user.id)
   if (!isAdmin) {
-    redirect('/')
+    redirect('/app/dashboard')
   }
 
   // ユーザーが所属する企業一覧を取得
