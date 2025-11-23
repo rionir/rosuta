@@ -92,8 +92,10 @@ function calculateActualWorkTime(
     })
 
     // 出勤と退勤がある場合のみ計算
-    if (clockInTime && clockOutTime) {
-      const workMinutes = (clockOutTime.getTime() - clockInTime.getTime()) / (1000 * 60)
+    if (clockInTime !== null && clockOutTime !== null) {
+      const clockIn = clockInTime as Date
+      const clockOut = clockOutTime as Date
+      const workMinutes = (clockOut.getTime() - clockIn.getTime()) / (1000 * 60)
       totalMinutes += workMinutes - dayBreakMinutes
       totalBreakMinutes += dayBreakMinutes
     }
