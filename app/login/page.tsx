@@ -2,6 +2,9 @@ import { redirect } from 'next/navigation'
 import { getCurrentUser } from '@/lib/actions/auth'
 import LoginForm from '@/components/auth/LoginForm'
 
+// 認証が必要なページのため、動的レンダリングを明示
+export const dynamic = 'force-dynamic'
+
 export default async function LoginPage() {
   // ログインページでは認証チェックをスキップ（認証が必要な場合はmiddlewareで処理）
   // try {

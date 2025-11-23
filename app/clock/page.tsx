@@ -4,6 +4,9 @@ import { getCurrentWorkStatus } from '@/lib/actions/clock-records'
 import { redirect } from 'next/navigation'
 import ClockComponent from '@/components/clock/ClockComponent'
 
+// 認証が必要なページのため、動的レンダリングを明示
+export const dynamic = 'force-dynamic'
+
 export default async function ClockPage({
   searchParams,
 }: {

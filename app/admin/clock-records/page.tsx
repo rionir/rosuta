@@ -5,6 +5,9 @@ import { getPendingClockRecords } from '@/lib/actions/clock-records'
 import { redirect } from 'next/navigation'
 import ClockRecordsApprovalComponent from '@/components/admin/ClockRecordsApprovalComponent'
 
+// 認証が必要なページのため、動的レンダリングを明示
+export const dynamic = 'force-dynamic'
+
 export default async function ClockRecordsApprovalPage({
   searchParams,
 }: {
