@@ -42,11 +42,17 @@ export async function createUser(input: CreateUserInput) {
   }
 
   // 2. usersテーブルにプロフィール情報を追加
+  // nameをlast_nameとfirst_nameに分割（スペースで分割）
+  const nameParts = input.name.trim().split(/\s+/)
+  const last_name = nameParts[0] || ''
+  const first_name = nameParts.slice(1).join(' ') || ''
+  
   const { error: profileError } = await supabase
     .from('users')
     .insert({
       id: authData.user.id,
-      name: input.name,
+      last_name,
+      first_name,
     })
 
   if (profileError) {
@@ -84,9 +90,14 @@ export async function updateUser(input: UpdateUserInput) {
 
   // usersテーブルの更新
   if (input.name) {
+    // nameをlast_nameとfirst_nameに分割（スペースで分割）
+    const nameParts = input.name.trim().split(/\s+/)
+    const last_name = nameParts[0] || ''
+    const first_name = nameParts.slice(1).join(' ') || ''
+    
     const { error } = await supabase
       .from('users')
-      .update({ name: input.name })
+      .update({ last_name, first_name })
       .eq('id', input.userId)
 
     if (error) {
@@ -146,7 +157,8 @@ export async function getCompanyUsers(companyId: number) {
       *,
       users (
         id,
-        name,
+        last_name,
+        first_name,
         created_at
       )
     `)

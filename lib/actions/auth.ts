@@ -74,9 +74,15 @@ export async function signUp(input: SignUpInput) {
 
   if (data.user) {
     // usersテーブルにプロフィール情報を追加
+    // nameをlast_nameとfirst_nameに分割（スペースで分割）
+    const nameParts = input.name.trim().split(/\s+/)
+    const last_name = nameParts[0] || ''
+    const first_name = nameParts.slice(1).join(' ') || ''
+    
     await supabase.from('users').insert({
       id: data.user.id,
-      name: input.name,
+      last_name,
+      first_name,
     })
   }
 

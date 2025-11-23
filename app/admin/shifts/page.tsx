@@ -78,13 +78,17 @@ export default async function ShiftsManagementPage({
     : { data: [] }
 
   // ユーザー情報をマップに変換（storeUsersから取得）
-  const userMap = new Map<string, { id: string; name: string }>()
+  const userMap = new Map<string, { id: string; last_name: string; first_name: string }>()
   if (storeUsers.data) {
     storeUsers.data.forEach((item: any) => {
       // usersがオブジェクトの場合と配列の場合の両方に対応
       const userInfo = item.users && !Array.isArray(item.users) ? item.users : null
-      if (userInfo && userInfo.id && userInfo.name) {
-        userMap.set(item.user_id, { id: userInfo.id, name: userInfo.name })
+      if (userInfo && userInfo.id && userInfo.last_name) {
+        userMap.set(item.user_id, { 
+          id: userInfo.id, 
+          last_name: userInfo.last_name,
+          first_name: userInfo.first_name
+        })
       }
     })
   }
