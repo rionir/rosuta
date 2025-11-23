@@ -1,28 +1,24 @@
 import { getCurrentUser, isUserAdmin } from '@/lib/actions/auth'
 import { getUserCompanies } from '@/lib/actions/auth'
+import { getCompanyUsers } from '@/lib/actions/users'
 import { getCompanyStores } from '@/lib/actions/stores'
-import { getPendingClockRecords } from '@/lib/actions/clock-records'
 import { redirect } from 'next/navigation'
-import ClockRecordsApprovalComponent from '@/components/admin/ClockRecordsApprovalComponent'
+import UsersManagementComponent from '@/components/admin/UsersManagementComponent'
 
 // 認証が必要なページのため、動的レンダリングを明示
 export const dynamic = 'force-dynamic'
 
-export default async function ClockRecordsApprovalPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ storeId?: string }>
-}) {
+export default async function UsersManagementPage() {
   const { data: user } = await getCurrentUser()
 
   if (!user) {
-    redirect('/login')
+    redirect('/app/login')
   }
 
   // 管理者権限チェック
   const isAdmin = await isUserAdmin(user.id)
   if (!isAdmin) {
-    redirect('/')
+    redirect('/app/dashboard')
   }
 
   // ユーザーが所属する企業一覧を取得
@@ -37,7 +33,7 @@ export default async function ClockRecordsApprovalPage({
           </div>
           <div className="p-8">
             <p className="text-gray-700 leading-relaxed">
-              打刻承認を行うには、まず企業に所属する必要があります。
+              スタッフを管理するには、まず企業に所属する必要があります。
             </p>
           </div>
         </div>
@@ -45,22 +41,17 @@ export default async function ClockRecordsApprovalPage({
     )
   }
 
-  const params = await searchParams
+  // 最初の企業のユーザー一覧と店舗一覧を取得
   const companyId = companies[0].company_id
+  const { data: users } = await getCompanyUsers(companyId)
   const { data: stores } = await getCompanyStores(companyId)
-  const selectedStoreId = params.storeId ? parseInt(params.storeId) : stores?.[0]?.id
-
-  // 選択された店舗の承認待ち打刻記録を取得
-  const pendingRecords = selectedStoreId
-    ? await getPendingClockRecords(selectedStoreId)
-    : { data: [] }
 
   return (
-    <ClockRecordsApprovalComponent
+    <UsersManagementComponent
       user={user}
+      companyId={companyId}
+      users={users || []}
       stores={stores || []}
-      selectedStoreId={selectedStoreId}
-      pendingRecords={pendingRecords.data || []}
     />
   )
 }

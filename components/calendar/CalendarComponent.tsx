@@ -450,8 +450,8 @@ export default function CalendarComponent({
                               {shift.company_stores && (
                                 <span className="ml-1 text-xs opacity-80">
                                   {shift.company_stores.name}
-                                </span>
-                              )}
+                              </span>
+                            )}
                             </span>
                           </div>
                         )}

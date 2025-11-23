@@ -34,18 +34,18 @@ export async function proxy(request: NextRequest) {
   } = await supabase.auth.getUser()
 
   // 保護されたルート
-  if (request.nextUrl.pathname.startsWith('/admin') || request.nextUrl.pathname.startsWith('/clock')) {
+  if (request.nextUrl.pathname.startsWith('/app/admin') || request.nextUrl.pathname.startsWith('/app/clock')) {
     if (!user) {
       const url = request.nextUrl.clone()
-      url.pathname = '/login'
+      url.pathname = '/app/login'
       return NextResponse.redirect(url)
     }
   }
 
-  // ログインページにアクセスした場合、既にログインしている場合はリダイレクト
-  if (request.nextUrl.pathname === '/login' && user) {
+  // ログインページにアクセスした場合、既にログインしている場合はダッシュボードにリダイレクト
+  if (request.nextUrl.pathname === '/app/login' && user) {
     const url = request.nextUrl.clone()
-    url.pathname = '/'
+    url.pathname = '/app/dashboard'
     return NextResponse.redirect(url)
   }
 

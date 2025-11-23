@@ -9,13 +9,13 @@ export default async function AdminPage() {
   const { data: user } = await getCurrentUser()
 
   if (!user) {
-    redirect('/login')
+      redirect('/app/login')
   }
 
   // 管理者権限チェック
   const isAdmin = await isUserAdmin(user.id)
   if (!isAdmin) {
-    redirect('/')
+      redirect('/app/dashboard')
   }
 
   return (
@@ -23,37 +23,37 @@ export default async function AdminPage() {
       {/* Feature Cards */}
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         <FeatureCard
-          href="/admin/calendar"
+          href="/app/admin/calendar"
           title="カレンダー"
           description="店舗全体・個人別の勤務状況を確認します"
           icon="calendar"
         />
         <FeatureCard
-          href="/admin/stores"
+          href="/app/admin/stores"
           title="店舗管理"
           description="店舗の追加・編集・削除を行います"
           icon="store"
         />
         <FeatureCard
-          href="/admin/users"
+          href="/app/admin/users"
           title="スタッフ管理"
           description="スタッフの追加・編集・削除、店舗所属設定を行います"
           icon="users"
         />
         <FeatureCard
-          href="/admin/shifts"
+          href="/app/admin/shifts"
           title="シフト管理"
           description="シフトの作成・編集・削除、コピーを行います"
           icon="shifts"
         />
         <FeatureCard
-          href="/admin/settings"
+          href="/app/admin/settings"
           title="設定"
           description="打刻承認設定などの店舗設定を管理します"
           icon="settings"
         />
         <FeatureCard
-          href="/admin/clock-records"
+          href="/app/admin/clock-records"
           title="打刻承認"
           description="打刻修正の承認・却下を行います"
           icon="approval"

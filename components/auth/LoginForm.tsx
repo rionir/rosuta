@@ -24,8 +24,8 @@ export default function LoginForm() {
       }
 
       if (result?.success) {
-        // 成功時はリダイレクト
-        router.push('/')
+        // 成功時はダッシュボードにリダイレクト
+        router.push('/app/dashboard')
         router.refresh()
       } else {
         setError('ログインに失敗しました')
