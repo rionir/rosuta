@@ -15,19 +15,22 @@ export interface Database {
       users: {
         Row: {
           id: string
-          name: string
+          last_name: string
+          first_name: string
           created_at: string
           updated_at: string
         }
         Insert: {
           id: string
-          name: string
+          last_name: string
+          first_name: string
           created_at?: string
           updated_at?: string
         }
         Update: {
           id?: string
-          name?: string
+          last_name?: string
+          first_name?: string
           created_at?: string
           updated_at?: string
         }

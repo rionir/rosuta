@@ -13,7 +13,9 @@ export interface AdminCalendarDayData {
     user_id: string
     users: {
       id: string
-      name: string
+      last_name: string
+      first_name: string
+      name?: string
     }
   }>
   clockRecords: Array<{
@@ -26,7 +28,9 @@ export interface AdminCalendarDayData {
     status: 'pending' | 'approved' | 'rejected'
     users: {
       id: string
-      name: string
+      last_name: string
+      first_name: string
+      name?: string
     }
   }>
 }
@@ -46,7 +50,7 @@ export async function getAdminCalendarData(
   year: number,
   month: number,
   userId?: string,
-  storeUsers?: Array<{ user_id: string; users: { id: string; name: string } | null }>
+  storeUsers?: Array<{ user_id: string; users: { id: string; last_name: string; first_name: string } | null }>
 ) {
   // 月の開始日と終了日を計算
   const startDate = new Date(year, month - 1, 1)
@@ -73,12 +77,16 @@ export async function getAdminCalendarData(
   let clockRecords = clockRecordsResult.data || []
 
   // ユーザー情報をマップに変換（storeUsersから取得）
-  const userMap = new Map<string, { id: string; name: string }>()
+  const userMap = new Map<string, { id: string; last_name: string; first_name: string }>()
   if (storeUsers) {
     storeUsers.forEach((item) => {
       const userInfo = item.users && !Array.isArray(item.users) ? item.users : null
-      if (userInfo && userInfo.id && userInfo.name) {
-        userMap.set(item.user_id, { id: userInfo.id, name: userInfo.name })
+      if (userInfo && userInfo.id && userInfo.last_name) {
+        userMap.set(item.user_id, { 
+          id: userInfo.id, 
+          last_name: userInfo.last_name,
+          first_name: userInfo.first_name
+        })
       }
     })
   }
@@ -196,7 +204,7 @@ export async function getUnclockedUsers(
     .filter((shift) => !clockedUserIds.has(shift.user_id))
     .map((shift) => ({
       user_id: shift.user_id,
-      name: shift.users?.name || '不明',
+      name: shift.users ? `${shift.users.last_name}${shift.users.first_name}`.trim() || '不明' : '不明',
       // scheduled_startとscheduled_endはTIMESTAMP型なので、そのまま使用
       scheduled_start: shift.scheduled_start,
       scheduled_end: shift.scheduled_end,

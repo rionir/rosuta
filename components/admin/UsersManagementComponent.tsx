@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createUser, updateUser, deleteUser } from '@/lib/actions/users'
 import { assignUserToStore, updateUserStore, getUserStores } from '@/lib/actions/user-stores'
+import { formatUserName } from '@/lib/utils/user-name'
 
 interface UsersManagementComponentProps {
   user: {
@@ -21,7 +22,8 @@ interface UsersManagementComponentProps {
     created_at: string
     users: {
       id: string
-      name: string
+      last_name: string
+      first_name: string
       created_at: string
     }
   }>
@@ -340,7 +342,7 @@ export default function UsersManagementComponent({
                             id={`name-${companyUser.user_id}`}
                             name="name"
                             type="text"
-                            defaultValue={companyUser.users.name}
+                            defaultValue={formatUserName(companyUser.users)}
                             required
                             className="block w-full rounded-lg border border-gray-300 px-4 py-2.5 shadow-sm transition-all focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
                           />
@@ -397,7 +399,7 @@ export default function UsersManagementComponent({
                       <>
                         <div className="flex items-center justify-between mb-4">
                           <div>
-                            <h3 className="text-lg font-semibold text-gray-900">{companyUser.users.name}</h3>
+                            <h3 className="text-lg font-semibold text-gray-900">{formatUserName(companyUser.users)}</h3>
                             <p className="mt-1 text-sm text-gray-600">
                               {companyUser.is_admin && (
                                 <span className="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800 mr-2">

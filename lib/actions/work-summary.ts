@@ -340,7 +340,7 @@ export async function getStoreWorkSummary(
   // シフトから予定時間を集計
   shifts.forEach((shift) => {
     const userId = shift.user_id
-    const userName = shift.users?.name || '不明'
+    const userName = shift.users ? `${shift.users.last_name} ${shift.users.first_name}`.trim() || '不明' : '不明'
 
     if (!userSummaries[userId]) {
       userSummaries[userId] = {
@@ -372,7 +372,7 @@ export async function getStoreWorkSummary(
     if (!userSummaries[userId]) {
       userSummaries[userId] = {
         userId,
-        userName: records[0]?.users?.name || '不明',
+        userName: records[0]?.users ? `${records[0].users.last_name} ${records[0].users.first_name}`.trim() || '不明' : '不明',
         scheduledHours: 0,
         actualHours: 0,
         breakMinutes: 0,

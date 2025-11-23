@@ -18,7 +18,9 @@ export default async function HomePage() {
         <div className="mb-10 overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-blue-100">
           <div className="border-b border-blue-100 bg-white px-8 py-10">
             <h1 className="text-4xl font-bold text-gray-900 tracking-tight">
-              ようこそ、{user.profile?.name || 'ユーザー'}さん
+              ようこそ、{user.profile?.last_name && user.profile?.first_name 
+                ? `${user.profile.last_name} ${user.profile.first_name}` 
+                : 'ユーザー'}さん
             </h1>
             <p className="mt-3 text-lg text-gray-600">
               ロスタのダッシュボードへようこそ。下記のカードから機能を選択してください。

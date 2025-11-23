@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { approveClockRecord } from '@/lib/actions/clock-records'
+import { formatUserName } from '@/lib/utils/user-name'
 
 interface ClockRecordsApprovalComponentProps {
   user: {
@@ -30,7 +31,8 @@ interface ClockRecordsApprovalComponentProps {
     created_at: string
     users: {
       id: string
-      name: string
+      last_name: string
+      first_name: string
     }
   }>
 }
@@ -137,7 +139,7 @@ export default function ClockRecordsApprovalComponent({
                     <div className="flex items-center justify-between">
                       <div className="flex-1">
                         <div className="flex items-center space-x-4 mb-2">
-                          <h3 className="text-lg font-semibold text-gray-900">{record.users.name}</h3>
+                          <h3 className="text-lg font-semibold text-gray-900">{formatUserName(record.users)}</h3>
                           <span className="inline-flex items-center rounded-full bg-yellow-100 px-2.5 py-0.5 text-xs font-medium text-yellow-800">
                             {typeLabels[record.type]}
                           </span>

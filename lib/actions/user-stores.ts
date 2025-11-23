@@ -122,7 +122,8 @@ export async function getStoreUsers(storeId: number) {
       *,
       users!user_stores_user_id_fkey (
         id,
-        name
+        last_name,
+        first_name
       )
     `)
     .eq('store_id', storeId)

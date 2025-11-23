@@ -40,10 +40,12 @@ export default async function Navigation() {
           <div className="flex items-center space-x-4">
             <div className="hidden sm:flex items-center space-x-3">
               <div className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-600 text-sm font-semibold text-white shadow-sm">
-                {user.profile?.name?.[0] || user.email?.[0]?.toUpperCase() || 'U'}
+                {user.profile?.last_name?.[0] || user.email?.[0]?.toUpperCase() || 'U'}
               </div>
               <span className="text-sm font-medium text-gray-700">
-                {user.profile?.name || user.email}
+                {user.profile?.last_name && user.profile?.first_name 
+                  ? `${user.profile.last_name} ${user.profile.first_name}` 
+                  : user.email}
               </span>
             </div>
             <form action={async () => {

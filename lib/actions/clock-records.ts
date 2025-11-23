@@ -213,7 +213,8 @@ export async function getStoreClockRecords(
       *,
       users!clock_records_user_id_fkey (
         id,
-        name
+        last_name,
+        first_name
       )
     `)
     .eq('store_id', storeId)
@@ -241,7 +242,8 @@ export async function getPendingClockRecords(storeId: number) {
       *,
       users!clock_records_user_id_fkey (
         id,
-        name
+        last_name,
+        first_name
       )
     `)
     .eq('store_id', storeId)
