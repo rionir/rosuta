@@ -7,6 +7,10 @@
 - **完了タスク**: 23/25 (92%)
 - **backend実装完了**: T001〜T012 (12タスク)
 - **UI実装完了**: T010a, T013, T014, T015, T019, T020, T021, T022, T023, T024, UI001 (11タスク)
+- **改善・修正タスク**: 
+  - ✅ タイムゾーン修正（JST対応）: シフト作成・更新時にJSTタイムゾーン情報を明示的に指定
+  - ✅ ユーザー名分割: usersテーブルのnameカラムをlast_nameとfirst_nameに分割
+  - ✅ カレンダーUI改善: 月ナビゲーションのUI改善（<>ボタン、今日ボタン、氏名スペース削除）
 - **残りタスク**: T016〜T018, UI002 (4タスク)
   - T016: Stripe課金管理
   - T017: 単体テスト
@@ -20,7 +24,7 @@
 | タスクID | カテゴリ | タスク内容 | 層 | 対象テーブル / モデル | 優先度 | 状態 | 備考 |
 |----------|---------|-----------|----|---------------------|--------|------|------|
 | T001 | 認証 | Supabase 認証連携 | backend | users | 高 | [x] | UUID を primary key として使用 |
-| T002 | ユーザー管理 | ユーザー追加・編集・削除 | backend | company_users | 高 | [x] | 企業ごとの役割管理（admin/staff） |
+| T002 | ユーザー管理 | ユーザー追加・編集・削除 | backend | company_users | 高 | [x] | 企業ごとの役割管理（admin/staff）、last_name/first_name分割対応 |
 | T003 | 店舗所属管理 | スタッフの店舗所属管理 | backend | user_stores | 高 | [x] | 複数店舗対応、所属有効フラグ管理 |
 | T004 | 企業管理 | 企業情報管理 | backend | companies | 高 | [x] | Stripe 顧客ID、プラン、ステータス管理 |
 | T005 | 店舗管理 | 店舗情報管理 | backend | company_stores | 高 | [x] | 店舗名・住所、複数店舗対応 |
@@ -33,13 +37,13 @@
 | T011 | 承認機能 | 打刻承認管理 | backend / api | clock_records / store_settings | 中 | [x] | pending / approved / rejected 状態管理（backend実装済み） |
 | T012 | 打刻編集 | 打刻編集機能（承認制適用） | backend / api | clock_records | 中 | [x] | 管理者が承認制の場合のみ反映（backend実装済み） |
 | T013 | カレンダー表示 | スタッフ向けカレンダー | UI / api | shifts / clock_records | 高 | [x] | 自分のシフト・過去打刻履歴表示、日ごと色分け、複数店舗切替 |
-| T014 | カレンダー表示 | 管理者向けカレンダー | UI / api | shifts / clock_records | 高 | [x] | 店舗全体・個人別勤務状況、日/週/月表示、未打刻者リスト |
+| T014 | カレンダー表示 | 管理者向けカレンダー | UI / api | shifts / clock_records | 高 | [x] | 店舗全体・個人別勤務状況、日/週/月表示、未打刻者リスト、月ナビゲーションUI改善（<>ボタン、今日ボタン） |
 | T015 | 勤務実績集計 | 日別・週別・月別勤務時間表示 | UI / api | shifts / clock_records | 中 | [x] | 予定時間との比較、店舗別集計 |
 | T016 | 課金管理 | Stripe サブスク情報管理 | backend / api | subscriptions | 中 | [ ] | current_period_start/end, status, subscription_id |
 | T019 | 管理画面 | 管理画面トップページ | UI | - | 高 | [x] | 各管理機能へのナビゲーション |
 | T020 | 店舗管理画面 | 店舗追加・編集・削除画面 | UI / api | company_stores | 高 | [x] | 店舗一覧、追加・編集フォーム、削除機能 |
 | T021 | スタッフ管理画面 | スタッフ追加・編集・削除、店舗所属設定画面 | UI / api | users / company_users / user_stores | 高 | [x] | スタッフ一覧、追加・編集フォーム、店舗所属設定、削除機能 |
-| T022 | シフト管理画面 | シフト作成・編集・削除、コピー画面 | UI / api | shifts | 高 | [x] | シフト一覧、作成・編集フォーム、日/週/月コピー機能、削除機能 |
+| T022 | シフト管理画面 | シフト作成・編集・削除、コピー画面 | UI / api | shifts | 高 | [x] | シフト一覧、作成・編集フォーム、日/週/月コピー機能、削除機能、JSTタイムゾーン対応 |
 | T023 | 設定画面 | 打刻承認設定などの店舗設定画面 | UI / api | store_settings | 中 | [x] | 店舗ごとの打刻承認設定ON/OFF |
 | T024 | 打刻承認画面 | 打刻修正の承認・却下画面 | UI / api | clock_records | 中 | [x] | 承認待ちリスト、承認・却下機能 |
 | T017 | テスト | 単体テスト実装 | backend / api / UI | すべて | 高 | [ ] | CRUD・打刻・承認・カレンダー表示 |
