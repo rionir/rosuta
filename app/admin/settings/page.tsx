@@ -5,6 +5,9 @@ import { getStoreSettings } from '@/lib/actions/store-settings'
 import { redirect } from 'next/navigation'
 import SettingsManagementComponent from '@/components/admin/SettingsManagementComponent'
 
+// 認証が必要なページのため、動的レンダリングを明示
+export const dynamic = 'force-dynamic'
+
 export default async function SettingsManagementPage({
   searchParams,
 }: {

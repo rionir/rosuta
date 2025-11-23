@@ -4,8 +4,8 @@ import { getStoreUsers } from '@/lib/actions/user-stores'
 import { redirect } from 'next/navigation'
 import AdminCalendarComponent from '@/components/admin/AdminCalendarComponent'
 
-// ページレベルのキャッシュ設定（60秒間）
-export const revalidate = 60
+// 認証が必要なページのため、動的レンダリングを明示
+export const dynamic = 'force-dynamic'
 
 export default async function AdminCalendarPage({
   searchParams,

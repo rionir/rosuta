@@ -3,6 +3,9 @@ import { getUserStores } from '@/lib/actions/user-stores'
 import { redirect } from 'next/navigation'
 import CalendarComponent from '@/components/calendar/CalendarComponent'
 
+// 認証が必要なページのため、動的レンダリングを明示
+export const dynamic = 'force-dynamic'
+
 export default async function ShiftsPage({
   searchParams,
 }: {
