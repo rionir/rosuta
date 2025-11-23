@@ -53,18 +53,18 @@ export default function Navigation({ user, isAdmin }: NavigationProps) {
     <>
       {/* デスクトップ: 上部ナビゲーション */}
       <nav className="hidden md:block sticky top-0 z-50 border-b border-blue-100 bg-white/95 backdrop-blur-lg shadow-sm">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="flex h-16 items-center justify-between">
-            {/* Logo and Navigation Links */}
-            <div className="flex items-center space-x-10">
-              <Link href="/" className="flex items-center space-x-2.5 group">
-                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-600 shadow-sm transition-all group-hover:bg-blue-700 group-hover:shadow-md">
-                  <span className="text-lg font-bold text-white">ロ</span>
-                </div>
-                <span className="text-xl font-bold text-gray-900 tracking-tight">
-                  ロスタ
-                </span>
-              </Link>
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="flex h-16 items-center justify-between">
+          {/* Logo and Navigation Links */}
+          <div className="flex items-center space-x-10">
+            <Link href="/" className="flex items-center space-x-2.5 group">
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-600 shadow-sm transition-all group-hover:bg-blue-700 group-hover:shadow-md">
+                <span className="text-lg font-bold text-white">ロ</span>
+              </div>
+              <span className="text-xl font-bold text-gray-900 tracking-tight">
+                ロスタ
+              </span>
+            </Link>
               <div className="flex space-x-1">
                 {isAdminPage ? (
                   <NavLink href="/admin" label="管理" pathname={pathname} />
@@ -75,30 +75,30 @@ export default function Navigation({ user, isAdmin }: NavigationProps) {
                     {isAdmin && <NavLink href="/admin" label="管理" pathname={pathname} />}
                   </>
                 )}
-              </div>
             </div>
+          </div>
 
-            {/* User Menu */}
-            <div className="flex items-center space-x-4">
+          {/* User Menu */}
+          <div className="flex items-center space-x-4">
               <span className="text-sm font-medium text-gray-700">
                 {user.profile?.last_name && user.profile?.first_name 
                   ? `${user.profile.last_name} ${user.profile.first_name}` 
                   : userEmail}
               </span>
-              <form action={async () => {
-                await signOut()
-              }}>
-                <button
-                  type="submit"
-                  className="rounded-lg px-4 py-2 text-sm font-medium text-gray-600 transition-all hover:bg-blue-50 hover:text-blue-700"
-                >
-                  ログアウト
-                </button>
-              </form>
-            </div>
+            <form action={async () => {
+              await signOut()
+            }}>
+              <button
+                type="submit"
+                className="rounded-lg px-4 py-2 text-sm font-medium text-gray-600 transition-all hover:bg-blue-50 hover:text-blue-700"
+              >
+                ログアウト
+              </button>
+            </form>
           </div>
         </div>
-      </nav>
+      </div>
+    </nav>
 
       {/* モバイル: 上部バー（ハンバーガーメニュー付き） */}
       <nav className="md:hidden sticky top-0 z-50 border-b border-blue-100 bg-white/95 backdrop-blur-lg shadow-sm">
