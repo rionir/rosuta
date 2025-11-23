@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { getAdminCalendarData, getUnclockedUsers } from '@/lib/actions/admin-calendar'
+import { formatUserName } from '@/lib/utils/user-name'
 
 interface AdminCalendarComponentProps {
   user: {
@@ -23,7 +24,8 @@ interface AdminCalendarComponentProps {
     user_id: string
     users: {
       id: string
-      name: string
+      last_name: string
+      first_name: string
     }
   }>
   year: number
@@ -41,7 +43,8 @@ interface AdminCalendarDayData {
     user_id: string
     users: {
       id: string
-      name: string
+      last_name: string
+      first_name: string
     }
   }>
   clockRecords: Array<{
@@ -54,7 +57,8 @@ interface AdminCalendarDayData {
     status: 'pending' | 'approved' | 'rejected'
     users: {
       id: string
-      name: string
+      last_name: string
+      first_name: string
     }
   }>
 }
@@ -315,7 +319,7 @@ export default function AdminCalendarComponent({
               <option value="">すべてのスタッフ</option>
               {storeUsers.map((storeUser) => (
                 <option key={storeUser.user_id} value={storeUser.user_id}>
-                  {storeUser.users.name}
+                  {formatUserName(storeUser.users, { noSpace: true })}
                 </option>
               ))}
             </select>
@@ -327,54 +331,58 @@ export default function AdminCalendarComponent({
       <div className="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-blue-100">
         <div className="bg-blue-50 px-6 py-4 border-b border-blue-100">
           <div className="flex items-center justify-between">
-            <h2 className="text-xl font-bold text-gray-900 tracking-tight">
-              {year}年 {monthNames[month - 1]}
-            </h2>
-            <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-2">
-                <label className="text-sm font-medium text-gray-700">
-                  詳細
-                </label>
-                <button
-                  type="button"
-                  onClick={() => setShowTimeDetails(!showTimeDetails)}
-                  className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${
-                    showTimeDetails ? 'bg-blue-600' : 'bg-gray-300'
+            <div className="flex items-center space-x-3">
+              <button
+                onClick={handlePrevMonth}
+                className="flex h-8 w-8 items-center justify-center rounded-lg text-gray-700 transition-all hover:bg-blue-100 hover:text-blue-700"
+                aria-label="前月"
+              >
+                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+              <button
+                onClick={handleNextMonth}
+                className="flex h-8 w-8 items-center justify-center rounded-lg text-gray-700 transition-all hover:bg-blue-100 hover:text-blue-700"
+                aria-label="次月"
+              >
+                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+              <h2 className="text-xl font-bold text-gray-900 tracking-tight">
+                {year}年 {monthNames[month - 1]}
+              </h2>
+              <button
+                onClick={() => {
+                  const today = new Date()
+                  const params = new URLSearchParams(searchParams.toString())
+                  params.set('year', today.getFullYear().toString())
+                  params.set('month', (today.getMonth() + 1).toString())
+                  router.push(`/admin/calendar?${params.toString()}`)
+                }}
+                className="rounded-lg px-3 py-1.5 text-sm font-medium text-gray-700 transition-all hover:bg-blue-100 hover:text-blue-700"
+              >
+                今日
+              </button>
+            </div>
+            <div className="flex items-center space-x-2">
+              <label className="text-sm font-medium text-gray-700">
+                詳細
+              </label>
+              <button
+                type="button"
+                onClick={() => setShowTimeDetails(!showTimeDetails)}
+                className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${
+                  showTimeDetails ? 'bg-blue-600' : 'bg-gray-300'
+                }`}
+              >
+                <span
+                  className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform ${
+                    showTimeDetails ? 'translate-x-5' : 'translate-x-0.5'
                   }`}
-                >
-                  <span
-                    className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform ${
-                      showTimeDetails ? 'translate-x-5' : 'translate-x-0.5'
-                    }`}
-                  />
-                </button>
-              </div>
-              <div className="flex items-center space-x-2">
-                <button
-                  onClick={handlePrevMonth}
-                  className="rounded-lg px-3 py-2 text-sm font-medium text-gray-700 transition-all hover:bg-blue-100 hover:text-blue-700"
-                >
-                  ← 前月
-                </button>
-                <button
-                  onClick={() => {
-                    const today = new Date()
-                    const params = new URLSearchParams(searchParams.toString())
-                    params.set('year', today.getFullYear().toString())
-                    params.set('month', (today.getMonth() + 1).toString())
-                    router.push(`/admin/calendar?${params.toString()}`)
-                  }}
-                  className="rounded-lg px-3 py-2 text-sm font-medium text-gray-700 transition-all hover:bg-blue-100 hover:text-blue-700"
-                >
-                  今月
-                </button>
-                <button
-                  onClick={handleNextMonth}
-                  className="rounded-lg px-3 py-2 text-sm font-medium text-gray-700 transition-all hover:bg-blue-100 hover:text-blue-700"
-                >
-                  次月 →
-                </button>
-              </div>
+                />
+              </button>
             </div>
           </div>
         </div>
@@ -416,7 +424,7 @@ export default function AdminCalendarComponent({
                 // シフトがないが打刻記録があるユーザーを抽出
                 const clockRecordsWithoutShift: Array<{
                   user_id: string
-                  users: { id: string; name: string } | null
+                  users: { id: string; last_name: string; first_name: string } | null
                   clock_in_time?: string
                 }> = []
                 
@@ -488,8 +496,8 @@ export default function AdminCalendarComponent({
                             >
                               <span className="block whitespace-normal break-words">
                                 {showTimeDetails
-                                  ? `${shift.users?.name || '不明'} ${new Date(shift.scheduled_start).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })}-${new Date(shift.scheduled_end).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })}`
-                                  : shift.users?.name || '不明'}
+                                  ? `${shift.users ? formatUserName(shift.users, { noSpace: true }) : '不明'} ${new Date(shift.scheduled_start).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })}-${new Date(shift.scheduled_end).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })}`
+                                  : shift.users ? formatUserName(shift.users, { noSpace: true }) : '不明'}
                               </span>
                             </div>
                           )
@@ -506,8 +514,8 @@ export default function AdminCalendarComponent({
                             >
                               <span className="block whitespace-normal break-words">
                                 {showTimeDetails && clockInTime
-                                  ? `${record.users?.name || '不明'} ${clockInTime}`
-                                  : record.users?.name || '不明'}
+                                  ? `${record.users ? formatUserName(record.users, { noSpace: true }) : '不明'} ${clockInTime}`
+                                  : record.users ? formatUserName(record.users, { noSpace: true }) : '不明'}
                               </span>
                             </div>
                           )
