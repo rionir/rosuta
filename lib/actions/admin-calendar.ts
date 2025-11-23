@@ -102,7 +102,9 @@ export async function getAdminCalendarData(
 
   // 打刻記録データにユーザー情報をマージ
   clockRecords = clockRecords.map((record: any) => {
-    const userInfo = userMap.get(record.user_id)
+    // usersが配列の場合、最初の要素を取得（1対1の関係なので）
+    const recordUser = Array.isArray(record.users) ? record.users[0] : record.users
+    const userInfo = userMap.get(record.user_id) || recordUser
     return {
       ...record,
       users: userInfo || null,
@@ -119,7 +121,7 @@ export async function getAdminCalendarData(
   const calendarData: Record<string, AdminCalendarDayData> = {}
 
   // シフトを日付ごとにグループ化（scheduled_startから日付を抽出）
-  shifts.forEach((shift) => {
+  shifts.forEach((shift: any) => {
     // scheduled_startはTIMESTAMP型なので、日付部分を抽出
     const date = new Date(shift.scheduled_start).toISOString().split('T')[0]
     if (!calendarData[date]) {
@@ -129,11 +131,11 @@ export async function getAdminCalendarData(
         clockRecords: [],
       }
     }
-    calendarData[date].shifts.push(shift)
+    calendarData[date].shifts.push(shift as AdminCalendarDayData['shifts'][0])
   })
 
   // 打刻記録を日付ごとにグループ化
-  clockRecords.forEach((record) => {
+  clockRecords.forEach((record: any) => {
     const date = record.selected_time.split('T')[0]
     if (!calendarData[date]) {
       calendarData[date] = {
@@ -142,7 +144,7 @@ export async function getAdminCalendarData(
         clockRecords: [],
       }
     }
-    calendarData[date].clockRecords.push(record)
+    calendarData[date].clockRecords.push(record as AdminCalendarDayData['clockRecords'][0])
   })
 
   return { data: Object.values(calendarData) }
@@ -165,7 +167,8 @@ export async function getUnclockedUsers(
       *,
       users!shifts_user_id_fkey (
         id,
-        name
+        last_name,
+        first_name
       )
     `)
     .eq('store_id', storeId)

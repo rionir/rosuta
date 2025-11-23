@@ -1,7 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
-import { revalidatePath } from 'next/cache'
+import { revalidatePath, revalidateTag } from 'next/cache'
 
 export type ClockRecordType = 'clock_in' | 'clock_out' | 'break_start' | 'break_end'
 export type ClockRecordMethod = 'scheduled' | 'current' | 'manual'
@@ -56,13 +56,17 @@ export async function createClockRecord(input: CreateClockRecordInput) {
       status,
       created_by: input.createdBy,
     })
-    .select()
+    .select('id, user_id, store_id, shift_id, break_id, type, selected_time, actual_time, method, status, created_by, approved_by, created_at, updated_at')
     .single()
 
   if (error) {
     return { error: error.message }
   }
 
+  // キャッシュを無効化
+  if (data?.store_id) {
+    revalidateTag(`clock-records-store-${data.store_id}`, 'max')
+  }
   revalidatePath('/clock')
   revalidatePath('/admin/clock-records')
   return { data }
@@ -125,6 +129,10 @@ export async function updateClockRecord(input: UpdateClockRecordInput) {
     return { error: error.message }
   }
 
+  // キャッシュを無効化
+  if (data?.store_id) {
+    revalidateTag(`clock-records-store-${data.store_id}`, 'max')
+  }
   revalidatePath('/clock')
   revalidatePath('/admin/clock-records')
   return { data }
@@ -147,13 +155,17 @@ export async function approveClockRecord(
       approved_by: approvedBy,
     })
     .eq('id', recordId)
-    .select()
+    .select('id, user_id, store_id, shift_id, break_id, type, selected_time, actual_time, method, status, created_by, approved_by, created_at, updated_at')
     .single()
 
   if (error) {
     return { error: error.message }
   }
 
+  // キャッシュを無効化
+  if (data?.store_id) {
+    revalidateTag(`clock-records-store-${data.store_id}`, 'max')
+  }
   revalidatePath('/admin/clock-records')
   return { data }
 }
@@ -210,7 +222,20 @@ export async function getStoreClockRecords(
   const { data, error } = await supabase
     .from('clock_records')
     .select(`
-      *,
+      id,
+      user_id,
+      store_id,
+      shift_id,
+      break_id,
+      type,
+      selected_time,
+      actual_time,
+      method,
+      status,
+      created_by,
+      approved_by,
+      created_at,
+      updated_at,
       users!clock_records_user_id_fkey (
         id,
         last_name,

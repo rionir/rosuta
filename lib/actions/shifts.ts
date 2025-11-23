@@ -1,7 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
-import { revalidatePath } from 'next/cache'
+import { revalidatePath, revalidateTag } from 'next/cache'
 
 export interface CreateShiftInput {
   userId: string
@@ -39,6 +39,8 @@ export async function createShift(input: CreateShiftInput) {
     return { error: error.message }
   }
 
+  // キャッシュを無効化
+  revalidateTag(`shifts-store-${input.storeId}`, 'max')
   revalidatePath('/shifts')
   revalidatePath('/admin/shifts')
   return { 
@@ -69,13 +71,17 @@ export async function updateShift(input: UpdateShiftInput) {
     .from('shifts')
     .update(updates)
     .eq('id', input.shiftId)
-    .select()
+    .select('id, user_id, store_id, scheduled_start, scheduled_end, created_by, created_at, updated_at')
     .single()
 
   if (error) {
     return { error: error.message }
   }
 
+  // キャッシュを無効化
+  if (data) {
+    revalidateTag(`shifts-store-${data.store_id}`, 'max')
+  }
   revalidatePath('/shifts')
   revalidatePath('/admin/shifts')
   return { data }
@@ -87,6 +93,13 @@ export async function updateShift(input: UpdateShiftInput) {
 export async function deleteShift(shiftId: number) {
   const supabase = await createClient()
 
+  // 削除前にstoreIdを取得
+  const { data: shiftData } = await supabase
+    .from('shifts')
+    .select('store_id')
+    .eq('id', shiftId)
+    .single()
+
   const { error } = await supabase
     .from('shifts')
     .delete()
@@ -96,6 +109,10 @@ export async function deleteShift(shiftId: number) {
     return { error: error.message }
   }
 
+  // キャッシュを無効化
+  if (shiftData) {
+    revalidateTag(`shifts-store-${shiftData.store_id}`, 'max')
+  }
   revalidatePath('/shifts')
   revalidatePath('/admin/shifts')
   return { data: { success: true } }
@@ -152,7 +169,7 @@ export async function getStoreShifts(
 
   const { data, error } = await supabase
     .from('shifts')
-    .select('*')
+    .select('id, user_id, store_id, scheduled_start, scheduled_end, created_by, created_at, updated_at')
     .eq('store_id', storeId)
     .gte('scheduled_start', `${startDate}T00:00:00`)
     .lte('scheduled_start', `${endDate}T23:59:59`)
@@ -163,7 +180,6 @@ export async function getStoreShifts(
     return { error: error.message }
   }
 
-  console.log('getStoreShifts result:', { storeId, startDate, endDate, count: data?.length || 0 })
   return { data: data || [] }
 }
 
