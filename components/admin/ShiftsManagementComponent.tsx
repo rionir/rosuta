@@ -96,7 +96,7 @@ export default function ShiftsManagementComponent({
 
       // 日付と時刻を組み合わせてTIMESTAMPに変換（JSTとして解釈）
       // JST (UTC+9) として明示的に指定
-      let scheduledStart = `${date}T${scheduledStartTime}:00+09:00`
+      const scheduledStart = `${date}T${scheduledStartTime}:00+09:00`
       let scheduledEnd = `${date}T${scheduledEndTime}:00+09:00`
       
       // 夜勤の場合、終了日を翌日に設定
@@ -150,7 +150,7 @@ export default function ShiftsManagementComponent({
 
       // 日付と時刻を組み合わせてTIMESTAMPに変換（JSTとして解釈）
       // JST (UTC+9) として明示的に指定
-      let scheduledStart = `${date}T${scheduledStartTime}:00+09:00`
+      const scheduledStart = `${date}T${scheduledStartTime}:00+09:00`
       let scheduledEnd = `${date}T${scheduledEndTime}:00+09:00`
       
       // 夜勤の場合、終了日を翌日に設定
