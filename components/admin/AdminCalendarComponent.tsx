@@ -74,6 +74,7 @@ export default function AdminCalendarComponent({
   const [calendarData, setCalendarData] = useState<AdminCalendarDayData[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [selectedDate, setSelectedDate] = useState<string | null>(null)
+  const [showTimeDetails, setShowTimeDetails] = useState(false)
   const [unclockedUsers, setUnclockedUsers] = useState<Array<{
     user_id: string
     name: string
@@ -89,7 +90,8 @@ export default function AdminCalendarComponent({
           selectedStoreId,
           year,
           month,
-          selectedUserId
+          selectedUserId,
+          storeUsers
         )
         if (result.data) {
           setCalendarData(result.data)
@@ -103,7 +105,7 @@ export default function AdminCalendarComponent({
       }
     }
     loadCalendarData()
-  }, [selectedStoreId, year, month, selectedUserId])
+  }, [selectedStoreId, year, month, selectedUserId, storeUsers])
 
   // 日付選択時に未打刻者リストを取得
   useEffect(() => {
@@ -130,6 +132,50 @@ export default function AdminCalendarComponent({
   const lastDay = new Date(year, month, 0)
   const daysInMonth = lastDay.getDate()
   const startingDayOfWeek = firstDay.getDay()
+  
+  // 前月の最終日を計算
+  const prevMonthLastDay = new Date(year, month - 1, 0)
+  const prevMonthDays = prevMonthLastDay.getDate()
+  
+  // カレンダーに表示する全42日（6週間）を計算
+  const totalDays = 42
+  const daysToShow: Array<{
+    day: number
+    month: number
+    year: number
+    isCurrentMonth: boolean
+  }> = []
+  
+  // 前月の日付を追加
+  for (let i = startingDayOfWeek - 1; i >= 0; i--) {
+    daysToShow.push({
+      day: prevMonthDays - i,
+      month: month - 1,
+      year: month === 1 ? year - 1 : year,
+      isCurrentMonth: false,
+    })
+  }
+  
+  // 今月の日付を追加
+  for (let day = 1; day <= daysInMonth; day++) {
+    daysToShow.push({
+      day,
+      month,
+      year,
+      isCurrentMonth: true,
+    })
+  }
+  
+  // 次の月の日付を追加（42日になるまで）
+  const remainingDays = totalDays - daysToShow.length
+  for (let day = 1; day <= remainingDays; day++) {
+    daysToShow.push({
+      day,
+      month: month + 1,
+      year: month === 12 ? year + 1 : year,
+      isCurrentMonth: false,
+    })
+  }
 
   // 前月・次月のナビゲーション
   const handlePrevMonth = () => {
@@ -171,17 +217,69 @@ export default function AdminCalendarComponent({
     return calendarData.find((d) => d.date === dateStr)
   }
 
-  // 日付の状態を判定（色分け用）
-  const getDayStatus = (dayData: AdminCalendarDayData | undefined) => {
-    if (!dayData) return 'none'
+  // シフトの出勤状況を判定
+  const getShiftStatus = (shift: AdminCalendarDayData['shifts'][0], clockRecords: AdminCalendarDayData['clockRecords'], dateStr: string) => {
+    const dayRecords = clockRecords.filter(
+      (record) => record.user_id === shift.user_id
+    )
 
-    const hasShifts = dayData.shifts.length > 0
-    const hasClockRecords = dayData.clockRecords.length > 0
+    const hasClockIn = dayRecords.some(
+      (record) => record.type === 'clock_in' && record.status === 'approved'
+    )
+    const hasClockOut = dayRecords.some(
+      (record) => record.type === 'clock_out' && record.status === 'approved'
+    )
+    const hasBreakStart = dayRecords.some(
+      (record) => record.type === 'break_start' && record.status === 'approved'
+    )
+    const hasBreakEnd = dayRecords.some(
+      (record) => record.type === 'break_end' && record.status === 'approved'
+    )
 
-    if (hasShifts && hasClockRecords) return 'has_both'
-    if (hasClockRecords) return 'has_records'
-    if (hasShifts) return 'has_shifts'
-    return 'none'
+    // 休憩中（break_startがあるがbreak_endがない）
+    if (hasBreakStart && !hasBreakEnd) {
+      return 'on_break'
+    }
+
+    // 退勤済み
+    if (hasClockOut) {
+      return 'clocked_out'
+    }
+
+    // 出勤済み
+    if (hasClockIn) {
+      return 'clocked_in'
+    }
+
+    // 開始時間が過ぎているかチェック
+    const now = new Date()
+    const shiftDateTime = new Date(`${dateStr}T${shift.scheduled_start}`)
+    
+    // 開始時間が過ぎている && 出勤していない → 遅刻または未出勤
+    if (now > shiftDateTime) {
+      return 'late_or_not_clocked'
+    }
+
+    // 未出勤（開始時間前）
+    return 'not_clocked'
+  }
+
+  // 出勤状況に応じた色を返す
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'clocked_in':
+        return 'bg-green-100 text-green-800 border-green-200'
+      case 'clocked_out':
+        return 'bg-blue-100 text-blue-800 border-blue-200'
+      case 'on_break':
+        return 'bg-yellow-100 text-yellow-800 border-yellow-200'
+      case 'late_or_not_clocked':
+        return 'bg-red-100 text-red-800 border-red-200'
+      case 'not_clocked':
+        return 'bg-gray-100 text-gray-600 border-gray-200'
+      default:
+        return 'bg-gray-100 text-gray-600 border-gray-200'
+    }
   }
 
   const monthNames = [
@@ -190,7 +288,7 @@ export default function AdminCalendarComponent({
   ]
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+    <div className="mx-auto max-w-7xl px-2 py-4 sm:px-4 lg:px-6">
       {/* フィルター */}
       <div className="mb-6 space-y-4">
         <div className="rounded-xl bg-white p-4 shadow-sm ring-1 ring-blue-100">
@@ -229,126 +327,143 @@ export default function AdminCalendarComponent({
             </select>
           </div>
         )}
+
       </div>
 
       <div className="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-blue-100">
-        <div className="border-b border-blue-100 bg-blue-50 px-8 py-7">
+        <div className="bg-blue-50 px-6 py-4 border-b border-blue-100">
           <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-bold text-gray-900 tracking-tight">
+            <h2 className="text-xl font-bold text-gray-900 tracking-tight">
               {year}年 {monthNames[month - 1]}
             </h2>
-            <div className="flex items-center space-x-2">
-              <button
-                onClick={handlePrevMonth}
-                className="rounded-lg px-3 py-2 text-sm font-medium text-gray-700 transition-all hover:bg-blue-100 hover:text-blue-700"
-              >
-                ← 前月
-              </button>
-              <button
-                onClick={() => {
-                  const today = new Date()
-                  const params = new URLSearchParams(searchParams.toString())
-                  params.set('year', today.getFullYear().toString())
-                  params.set('month', (today.getMonth() + 1).toString())
-                  router.push(`/admin/calendar?${params.toString()}`)
-                }}
-                className="rounded-lg px-3 py-2 text-sm font-medium text-gray-700 transition-all hover:bg-blue-100 hover:text-blue-700"
-              >
-                今月
-              </button>
-              <button
-                onClick={handleNextMonth}
-                className="rounded-lg px-3 py-2 text-sm font-medium text-gray-700 transition-all hover:bg-blue-100 hover:text-blue-700"
-              >
-                次月 →
-              </button>
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-2">
+                <label className="text-sm font-medium text-gray-700">
+                  詳細
+                </label>
+                <button
+                  type="button"
+                  onClick={() => setShowTimeDetails(!showTimeDetails)}
+                  className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${
+                    showTimeDetails ? 'bg-blue-600' : 'bg-gray-300'
+                  }`}
+                >
+                  <span
+                    className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform ${
+                      showTimeDetails ? 'translate-x-5' : 'translate-x-0.5'
+                    }`}
+                  />
+                </button>
+              </div>
+              <div className="flex items-center space-x-2">
+                <button
+                  onClick={handlePrevMonth}
+                  className="rounded-lg px-3 py-2 text-sm font-medium text-gray-700 transition-all hover:bg-blue-100 hover:text-blue-700"
+                >
+                  ← 前月
+                </button>
+                <button
+                  onClick={() => {
+                    const today = new Date()
+                    const params = new URLSearchParams(searchParams.toString())
+                    params.set('year', today.getFullYear().toString())
+                    params.set('month', (today.getMonth() + 1).toString())
+                    router.push(`/admin/calendar?${params.toString()}`)
+                  }}
+                  className="rounded-lg px-3 py-2 text-sm font-medium text-gray-700 transition-all hover:bg-blue-100 hover:text-blue-700"
+                >
+                  今月
+                </button>
+                <button
+                  onClick={handleNextMonth}
+                  className="rounded-lg px-3 py-2 text-sm font-medium text-gray-700 transition-all hover:bg-blue-100 hover:text-blue-700"
+                >
+                  次月 →
+                </button>
+              </div>
             </div>
           </div>
         </div>
+      </div>
 
-        <div className="p-8">
+      <div className="p-1">
           {isLoading ? (
             <div className="flex items-center justify-center py-12">
               <div className="text-gray-500">読み込み中...</div>
             </div>
           ) : (
-            <div className="grid grid-cols-7 gap-2">
+            <div className="grid grid-cols-7 gap-0 border border-gray-100 rounded-b-2xl overflow-hidden">
               {/* 曜日ヘッダー */}
               {['日', '月', '火', '水', '木', '金', '土'].map((day) => (
                 <div
                   key={day}
-                  className="py-2 text-center text-sm font-semibold text-gray-700"
+                  className="py-1 text-center text-xs font-medium text-gray-600 border-b border-gray-100"
                 >
                   {day}
                 </div>
               ))}
 
-              {/* 空白セル（月初め） */}
-              {Array.from({ length: startingDayOfWeek }).map((_, i) => (
-                <div key={`empty-${i}`} className="aspect-square" />
-              ))}
-
-              {/* 日付セル */}
-              {Array.from({ length: daysInMonth }).map((_, i) => {
-                const day = i + 1
-                const dayData = getDayData(day)
-                const status = getDayStatus(dayData)
+              {/* 日付セル（前月・今月・次月を含む） */}
+              {daysToShow.map((dateInfo, i) => {
+                const dateStr = `${dateInfo.year}-${String(dateInfo.month).padStart(2, '0')}-${String(dateInfo.day).padStart(2, '0')}`
+                const dayData = dateInfo.isCurrentMonth ? getDayData(dateInfo.day) : null
                 const isToday =
-                  new Date().getFullYear() === year &&
-                  new Date().getMonth() + 1 === month &&
-                  new Date().getDate() === day
-                const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`
+                  new Date().getFullYear() === dateInfo.year &&
+                  new Date().getMonth() + 1 === dateInfo.month &&
+                  new Date().getDate() === dateInfo.day
+
+                // シフトを開始時間順でソート
+                const sortedShifts = dayData
+                  ? [...dayData.shifts].sort((a, b) => {
+                      return a.scheduled_start.localeCompare(b.scheduled_start)
+                    })
+                  : []
 
                 return (
                   <div
-                    key={day}
-                    onClick={() => setSelectedDate(selectedDate === dateStr ? null : dateStr)}
-                    className={`min-h-[120px] cursor-pointer rounded-lg border-2 p-2 transition-all ${
-                      isToday
-                        ? 'border-blue-600 bg-blue-50 shadow-sm'
-                        : status === 'has_both'
-                        ? 'border-green-200 bg-green-50'
-                        : status === 'has_records'
-                        ? 'border-blue-200 bg-blue-50'
-                        : status === 'has_shifts'
-                        ? 'border-gray-200 bg-gray-50'
-                        : 'border-gray-100 bg-white'
-                    } ${selectedDate === dateStr ? 'ring-2 ring-blue-500' : ''}`}
+                    key={`${dateInfo.year}-${dateInfo.month}-${dateInfo.day}-${i}`}
+                    onClick={() => {
+                      if (dateInfo.isCurrentMonth) {
+                        setSelectedDate(selectedDate === dateStr ? null : dateStr)
+                      }
+                    }}
+                    className={`min-h-[90px] border-r border-b border-gray-100 p-0.5 transition-all ${
+                      !dateInfo.isCurrentMonth
+                        ? 'bg-gray-50'
+                        : isToday
+                        ? 'bg-blue-50'
+                        : 'bg-white'
+                    } ${dateInfo.isCurrentMonth && selectedDate === dateStr ? 'ring-2 ring-blue-500 ring-inset' : ''} ${
+                      dateInfo.isCurrentMonth ? 'cursor-pointer' : 'cursor-default'
+                    }`}
                   >
-                    <div className={`mb-1 text-sm font-semibold ${
-                      isToday ? 'text-blue-700' : 'text-gray-900'
+                    <div className={`mb-0.5 px-1 text-xs font-medium ${
+                      !dateInfo.isCurrentMonth
+                        ? 'text-gray-400'
+                        : isToday
+                        ? 'text-blue-700 font-semibold'
+                        : 'text-gray-900'
                     }`}>
-                      {day}
+                      {dateInfo.day}
                     </div>
-                    {dayData && (
-                      <div className="space-y-1">
-                        {dayData.shifts.length > 0 && (
-                          <div className="rounded bg-white/60 px-1.5 py-0.5 text-xs font-medium text-gray-700">
-                            📅 {dayData.shifts.length}件のシフト
-                          </div>
-                        )}
-                        {dayData.clockRecords.length > 0 && (
-                          <div className="rounded bg-white/60 px-1.5 py-0.5 text-xs font-medium text-gray-700">
-                            ⏰ {dayData.clockRecords.length}件の打刻
-                          </div>
-                        )}
-                        {dayData.shifts.length > 0 && (
-                          <div className="mt-1 space-y-0.5">
-                            {dayData.shifts.slice(0, 2).map((shift) => (
-                              <div
-                                key={shift.id}
-                                className="truncate rounded bg-blue-100 px-1 py-0.5 text-xs text-blue-800"
-                              >
-                                {shift.users?.name || '不明'}: {shift.scheduled_start.substring(0, 5)}〜{shift.scheduled_end.substring(0, 5)}
-                              </div>
-                            ))}
-                            {dayData.shifts.length > 2 && (
-                              <div className="text-xs text-gray-500">
-                                +{dayData.shifts.length - 2}件
-                              </div>
-                            )}
-                          </div>
-                        )}
+                    {dayData && sortedShifts.length > 0 && (
+                      <div className="flex flex-col gap-0.5 px-0.5">
+                        {sortedShifts.map((shift) => {
+                          const status = getShiftStatus(shift, dayData.clockRecords, dateStr)
+                          const statusColor = getStatusColor(status)
+                          return (
+                            <div
+                              key={shift.id}
+                              className={`w-full rounded px-1 py-0.5 text-xs font-medium ${statusColor}`}
+                            >
+                              <span className="block whitespace-normal break-words">
+                                {showTimeDetails
+                                  ? `${shift.users?.name || '不明'} ${shift.scheduled_start.substring(0, 5)}-${shift.scheduled_end.substring(0, 5)}`
+                                  : shift.users?.name || '不明'}
+                              </span>
+                            </div>
+                          )
+                        })}
                       </div>
                     )}
                   </div>
@@ -356,7 +471,6 @@ export default function AdminCalendarComponent({
               })}
             </div>
           )}
-        </div>
       </div>
 
       {/* 未打刻者リスト */}
