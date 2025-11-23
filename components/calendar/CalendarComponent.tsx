@@ -29,7 +29,6 @@ interface CalendarDayData {
   date: string
   shifts: Array<{
     id: number
-    date: string
     scheduled_start: string
     scheduled_end: string
     store_id: number
@@ -229,8 +228,8 @@ export default function CalendarComponent({
                       <div className="space-y-1">
                         {dayData.shifts.length > 0 && (
                           <div className="rounded bg-white/60 px-1.5 py-0.5 text-xs font-medium text-gray-700">
-                            📅 {dayData.shifts[0].scheduled_start.substring(0, 5)}〜
-                            {dayData.shifts[0].scheduled_end.substring(0, 5)}
+                            📅 {new Date(dayData.shifts[0].scheduled_start).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })}〜
+                            {new Date(dayData.shifts[0].scheduled_end).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })}
                             {dayData.shifts[0].company_stores && (
                               <span className="ml-1 text-gray-500">
                                 ({dayData.shifts[0].company_stores.name})

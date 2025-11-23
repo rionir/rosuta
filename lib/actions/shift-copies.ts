@@ -17,11 +17,12 @@ export interface CopyShiftsInput {
 export async function copyShifts(input: CopyShiftsInput) {
   const supabase = await createClient()
 
-  // コピー元のシフトを取得
+  // コピー元のシフトを取得（scheduled_startの日付でフィルタリング）
   let query = supabase
     .from('shifts')
     .select('*')
-    .eq('date', input.sourceDate)
+    .gte('scheduled_start', `${input.sourceDate}T00:00:00`)
+    .lte('scheduled_start', `${input.sourceDate}T23:59:59`)
 
   if (input.storeId) {
     query = query.eq('store_id', input.storeId)
@@ -37,11 +38,12 @@ export async function copyShifts(input: CopyShiftsInput) {
     return { data: { copied: 0, skipped: 0 } }
   }
 
-  // コピー先の既存シフトを確認
+  // コピー先の既存シフトを確認（scheduled_startの日付でフィルタリング）
   let checkQuery = supabase
     .from('shifts')
     .select('id, user_id')
-    .eq('date', input.targetDate)
+    .gte('scheduled_start', `${input.targetDate}T00:00:00`)
+    .lte('scheduled_start', `${input.targetDate}T23:59:59`)
 
   if (input.storeId) {
     checkQuery = checkQuery.eq('store_id', input.storeId)
@@ -68,11 +70,22 @@ export async function copyShifts(input: CopyShiftsInput) {
 
     if (existingId && input.overwrite) {
       // 既存シフトを更新
+      // scheduled_startとscheduled_endの日付部分をtargetDateに変更
+      const sourceStart = new Date(sourceShift.scheduled_start)
+      const sourceEnd = new Date(sourceShift.scheduled_end)
+      const targetStart = new Date(`${input.targetDate}T${sourceStart.toTimeString().split(' ')[0]}`)
+      const targetEnd = new Date(`${input.targetDate}T${sourceEnd.toTimeString().split(' ')[0]}`)
+      
+      // 夜勤の場合、終了日を翌日に設定
+      if (targetEnd < targetStart) {
+        targetEnd.setDate(targetEnd.getDate() + 1)
+      }
+      
       const { error: updateError } = await supabase
         .from('shifts')
         .update({
-          scheduled_start: sourceShift.scheduled_start,
-          scheduled_end: sourceShift.scheduled_end,
+          scheduled_start: targetStart.toISOString(),
+          scheduled_end: targetEnd.toISOString(),
         })
         .eq('id', existingId)
 
@@ -90,12 +103,24 @@ export async function copyShifts(input: CopyShiftsInput) {
         // 既存の休憩を削除
         await supabase.from('shift_breaks').delete().eq('shift_id', existingId)
 
-        // 休憩をコピー
-        const breaksToInsert = sourceBreaks.map((b) => ({
-          shift_id: existingId,
-          break_start: b.break_start,
-          break_end: b.break_end,
-        }))
+        // 休憩をコピー（日付部分をtargetDateに変更）
+        const breaksToInsert = sourceBreaks.map((b) => {
+          const breakStart = new Date(b.break_start)
+          const breakEnd = new Date(b.break_end)
+          const targetBreakStart = new Date(`${input.targetDate}T${breakStart.toTimeString().split(' ')[0]}`)
+          const targetBreakEnd = new Date(`${input.targetDate}T${breakEnd.toTimeString().split(' ')[0]}`)
+          
+          // 夜勤の場合、終了時刻を翌日に設定
+          if (targetBreakEnd < targetBreakStart) {
+            targetBreakEnd.setDate(targetBreakEnd.getDate() + 1)
+          }
+          
+          return {
+            shift_id: existingId,
+            break_start: targetBreakStart.toISOString(),
+            break_end: targetBreakEnd.toISOString(),
+          }
+        })
 
         await supabase.from('shift_breaks').insert(breaksToInsert)
       }
@@ -103,14 +128,24 @@ export async function copyShifts(input: CopyShiftsInput) {
       copied++
     } else {
       // 新規シフトを作成
+      // scheduled_startとscheduled_endの日付部分をtargetDateに変更
+      const sourceStart = new Date(sourceShift.scheduled_start)
+      const sourceEnd = new Date(sourceShift.scheduled_end)
+      const targetStart = new Date(`${input.targetDate}T${sourceStart.toTimeString().split(' ')[0]}`)
+      const targetEnd = new Date(`${input.targetDate}T${sourceEnd.toTimeString().split(' ')[0]}`)
+      
+      // 夜勤の場合、終了日を翌日に設定
+      if (targetEnd < targetStart) {
+        targetEnd.setDate(targetEnd.getDate() + 1)
+      }
+      
       const { data: newShift, error: insertError } = await supabase
         .from('shifts')
         .insert({
           user_id: sourceShift.user_id,
           store_id: sourceShift.store_id,
-          date: input.targetDate,
-          scheduled_start: sourceShift.scheduled_start,
-          scheduled_end: sourceShift.scheduled_end,
+          scheduled_start: targetStart.toISOString(),
+          scheduled_end: targetEnd.toISOString(),
           created_by: input.userId,
         })
         .select()
@@ -127,11 +162,24 @@ export async function copyShifts(input: CopyShiftsInput) {
         .eq('shift_id', sourceShift.id)
 
       if (sourceBreaks && sourceBreaks.length > 0) {
-        const breaksToInsert = sourceBreaks.map((b) => ({
-          shift_id: newShift.id,
-          break_start: b.break_start,
-          break_end: b.break_end,
-        }))
+        // 休憩をコピー（日付部分をtargetDateに変更）
+        const breaksToInsert = sourceBreaks.map((b) => {
+          const breakStart = new Date(b.break_start)
+          const breakEnd = new Date(b.break_end)
+          const targetBreakStart = new Date(`${input.targetDate}T${breakStart.toTimeString().split(' ')[0]}`)
+          const targetBreakEnd = new Date(`${input.targetDate}T${breakEnd.toTimeString().split(' ')[0]}`)
+          
+          // 夜勤の場合、終了時刻を翌日に設定
+          if (targetBreakEnd < targetBreakStart) {
+            targetBreakEnd.setDate(targetBreakEnd.getDate() + 1)
+          }
+          
+          return {
+            shift_id: newShift.id,
+            break_start: targetBreakStart.toISOString(),
+            break_end: targetBreakEnd.toISOString(),
+          }
+        })
 
         await supabase.from('shift_breaks').insert(breaksToInsert)
       }

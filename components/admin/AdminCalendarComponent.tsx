@@ -36,7 +36,6 @@ interface AdminCalendarDayData {
   date: string
   shifts: Array<{
     id: number
-    date: string
     scheduled_start: string
     scheduled_end: string
     user_id: string
@@ -211,11 +210,6 @@ export default function AdminCalendarComponent({
     router.push(`/admin/calendar?${params.toString()}`)
   }
 
-  // 日付ごとのデータを取得
-  const getDayData = (day: number): AdminCalendarDayData | undefined => {
-    const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`
-    return calendarData.find((d) => d.date === dateStr)
-  }
 
   // シフトの出勤状況を判定
   const getShiftStatus = (shift: AdminCalendarDayData['shifts'][0], clockRecords: AdminCalendarDayData['clockRecords'], dateStr: string) => {
@@ -253,7 +247,7 @@ export default function AdminCalendarComponent({
 
     // 開始時間が過ぎているかチェック
     const now = new Date()
-    const shiftDateTime = new Date(`${dateStr}T${shift.scheduled_start}`)
+    const shiftDateTime = new Date(shift.scheduled_start)
     
     // 開始時間が過ぎている && 出勤していない → 遅刻または未出勤
     if (now > shiftDateTime) {
@@ -406,7 +400,7 @@ export default function AdminCalendarComponent({
               {/* 日付セル（前月・今月・次月を含む） */}
               {daysToShow.map((dateInfo, i) => {
                 const dateStr = `${dateInfo.year}-${String(dateInfo.month).padStart(2, '0')}-${String(dateInfo.day).padStart(2, '0')}`
-                const dayData = dateInfo.isCurrentMonth ? getDayData(dateInfo.day) : null
+                const dayData = dateInfo.isCurrentMonth ? calendarData.find((d) => d.date === dateStr) : null
                 const isToday =
                   new Date().getFullYear() === dateInfo.year &&
                   new Date().getMonth() + 1 === dateInfo.month &&
@@ -415,9 +409,44 @@ export default function AdminCalendarComponent({
                 // シフトを開始時間順でソート
                 const sortedShifts = dayData
                   ? [...dayData.shifts].sort((a, b) => {
-                      return a.scheduled_start.localeCompare(b.scheduled_start)
+                      return new Date(a.scheduled_start).getTime() - new Date(b.scheduled_start).getTime()
                     })
                   : []
+
+                // シフトがないが打刻記録があるユーザーを抽出
+                const clockRecordsWithoutShift: Array<{
+                  user_id: string
+                  users: { id: string; name: string } | null
+                  clock_in_time?: string
+                }> = []
+                
+                if (dayData && dayData.clockRecords.length > 0) {
+                  const shiftUserIds = new Set(dayData.shifts.map((s) => s.user_id))
+                  const clockInRecords = dayData.clockRecords.filter(
+                    (r) => r.type === 'clock_in' && r.status === 'approved' && !shiftUserIds.has(r.user_id)
+                  )
+                  
+                  // ユーザーごとに最初の出勤時刻を取得
+                  const userClockInMap = new Map<string, string>()
+                  clockInRecords.forEach((record) => {
+                    if (!userClockInMap.has(record.user_id)) {
+                      userClockInMap.set(record.user_id, record.selected_time)
+                    }
+                  })
+                  
+                  userClockInMap.forEach((clockInTime, userId) => {
+                    const record = clockInRecords.find((r) => r.user_id === userId)
+                    if (record) {
+                      clockRecordsWithoutShift.push({
+                        user_id: userId,
+                        users: record.users,
+                        clock_in_time: clockInTime,
+                      })
+                    }
+                  })
+                }
+
+                const hasData = (sortedShifts.length > 0 || clockRecordsWithoutShift.length > 0)
 
                 return (
                   <div
@@ -446,8 +475,9 @@ export default function AdminCalendarComponent({
                     }`}>
                       {dateInfo.day}
                     </div>
-                    {dayData && sortedShifts.length > 0 && (
+                    {dayData && hasData && (
                       <div className="flex flex-col gap-0.5 px-0.5">
+                        {/* シフトがあるユーザー */}
                         {sortedShifts.map((shift) => {
                           const status = getShiftStatus(shift, dayData.clockRecords, dateStr)
                           const statusColor = getStatusColor(status)
@@ -458,8 +488,26 @@ export default function AdminCalendarComponent({
                             >
                               <span className="block whitespace-normal break-words">
                                 {showTimeDetails
-                                  ? `${shift.users?.name || '不明'} ${shift.scheduled_start.substring(0, 5)}-${shift.scheduled_end.substring(0, 5)}`
+                                  ? `${shift.users?.name || '不明'} ${new Date(shift.scheduled_start).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })}-${new Date(shift.scheduled_end).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })}`
                                   : shift.users?.name || '不明'}
+                              </span>
+                            </div>
+                          )
+                        })}
+                        {/* シフトがないが打刻記録があるユーザー */}
+                        {clockRecordsWithoutShift.map((record) => {
+                          const clockInTime = record.clock_in_time
+                            ? new Date(record.clock_in_time).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })
+                            : ''
+                          return (
+                            <div
+                              key={`no-shift-${record.user_id}`}
+                              className="w-full rounded px-1 py-0.5 text-xs font-medium bg-green-100 text-green-800 border-green-200"
+                            >
+                              <span className="block whitespace-normal break-words">
+                                {showTimeDetails && clockInTime
+                                  ? `${record.users?.name || '不明'} ${clockInTime}`
+                                  : record.users?.name || '不明'}
                               </span>
                             </div>
                           )
@@ -491,7 +539,7 @@ export default function AdminCalendarComponent({
                   <div className="flex items-center justify-between">
                     <span className="font-medium text-gray-900">{user.name}</span>
                     <span className="text-sm text-gray-600">
-                      予定: {user.scheduled_start.substring(0, 5)}〜{user.scheduled_end.substring(0, 5)}
+                      予定: {new Date(user.scheduled_start).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })}〜{new Date(user.scheduled_end).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })}
                     </span>
                   </div>
                 </li>

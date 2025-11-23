@@ -6,9 +6,8 @@ import { revalidatePath } from 'next/cache'
 export interface CreateShiftInput {
   userId: string
   storeId: number
-  date: string // YYYY-MM-DD
-  scheduledStart: string // HH:mm
-  scheduledEnd: string // HH:mm
+  scheduledStart: string // ISO 8601 TIMESTAMP
+  scheduledEnd: string // ISO 8601 TIMESTAMP
   createdBy: string
 }
 
@@ -29,7 +28,6 @@ export async function createShift(input: CreateShiftInput) {
     .insert({
       user_id: input.userId,
       store_id: input.storeId,
-      date: input.date,
       scheduled_start: input.scheduledStart,
       scheduled_end: input.scheduledEnd,
       created_by: input.createdBy,
@@ -48,7 +46,6 @@ export async function createShift(input: CreateShiftInput) {
       id: data.id, 
       user_id: data.user_id, 
       store_id: data.store_id, 
-      date: data.date, 
       scheduled_start: data.scheduled_start, 
       scheduled_end: data.scheduled_end, 
       created_by: data.created_by,
@@ -125,9 +122,8 @@ export async function getUserShifts(
       )
     `)
     .eq('user_id', userId)
-    .gte('date', startDate)
-    .lte('date', endDate)
-    .order('date', { ascending: true })
+    .gte('scheduled_start', `${startDate}T00:00:00`)
+    .lte('scheduled_start', `${endDate}T23:59:59`)
     .order('scheduled_start', { ascending: true })
 
   if (storeId) {
@@ -158,9 +154,8 @@ export async function getStoreShifts(
     .from('shifts')
     .select('*')
     .eq('store_id', storeId)
-    .gte('date', startDate)
-    .lte('date', endDate)
-    .order('date', { ascending: true })
+    .gte('scheduled_start', `${startDate}T00:00:00`)
+    .lte('scheduled_start', `${endDate}T23:59:59`)
     .order('scheduled_start', { ascending: true })
 
   if (error) {
