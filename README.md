@@ -1,6 +1,6 @@
 # ロスタ (rosuta.com)
 
-勤怠・シフト管理 SaaS - MVP（複数店舗対応版）
+勤怠・シフト管理 SaaS
 
 ## 技術スタック
 
@@ -38,8 +38,10 @@ STRIPE_WEBHOOK_SECRET=your_stripe_webhook_secret
 ### 3. Supabaseデータベースのセットアップ
 
 1. Supabaseプロジェクトを作成
-2. `supabase/migrations/001_initial_schema.sql`をSupabaseのSQL Editorで実行
-3. Row Level Security (RLS) ポリシーを設定（後で実装）
+2. `supabase/migrations/`配下のマイグレーションファイルを順番に実行
+3. Row Level Security (RLS) ポリシーが設定済み
+
+> 💡 **注意**: マイグレーションファイルは時系列順に実行してください。
 
 ### 4. 開発サーバーの起動
 
@@ -48,6 +50,38 @@ npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+
+## プロジェクト構造
+
+```
+app/
+├── layout.tsx              # ルートレイアウト（<html>, <body>, フォント, ThemeProvider）
+├── page.tsx                # ランディングページ（/）
+├── not-found.tsx           # カスタム404ページ
+└── app/                    # サービスページ（/app/*）
+    ├── layout.tsx          # アプリレイアウト（NavigationWrapper）
+    ├── dashboard/          # ダッシュボード（/app/dashboard）
+    ├── login/              # ログインページ（/app/login）
+    ├── clock/              # 打刻画面（/app/clock）
+    ├── shifts/             # シフトカレンダー（/app/shifts）
+    ├── summary/            # 勤務実績集計（/app/summary）
+    └── admin/              # 管理画面（/app/admin/*）
+        ├── calendar/       # 管理者カレンダー
+        ├── shifts/         # シフト管理
+        ├── users/          # スタッフ管理
+        ├── stores/         # 店舗管理
+        ├── clock-records/  # 打刻承認
+        └── settings/       # 設定
+```
+
+## 主な機能
+
+- ✅ **打刻管理**: 出勤・退勤・休憩の打刻を簡単に記録
+- ✅ **シフト管理**: シフトの作成・編集・削除、日/週/月単位でのコピー機能
+- ✅ **カレンダー表示**: スタッフや管理者がシフトと打刻記録を一目で確認
+- ✅ **打刻承認**: 打刻の修正や手動打刻を承認フローで管理
+- ✅ **勤務実績集計**: 日別・週別・月別で勤務時間を集計
+- ✅ **複数店舗対応**: 1店舗から複数店舗まで対応。店舗ごとの設定やスタッフの所属管理が可能
 
 ## Learn More
 
