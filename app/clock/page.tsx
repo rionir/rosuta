@@ -7,7 +7,7 @@ import ClockComponent from '@/components/clock/ClockComponent'
 export default async function ClockPage({
   searchParams,
 }: {
-  searchParams: { storeId?: string }
+  searchParams: Promise<{ storeId?: string }>
 }) {
   const { data: user } = await getCurrentUser()
 
@@ -32,8 +32,9 @@ export default async function ClockPage({
   }
 
   // 選択された店舗ID（デフォルトは最初の店舗）
-  const selectedStoreId = searchParams.storeId
-    ? parseInt(searchParams.storeId)
+  const params = await searchParams
+  const selectedStoreId = params.storeId
+    ? parseInt(params.storeId)
     : (userStores[0]?.store_id as number)
 
   // 現在の勤務ステータスを取得
