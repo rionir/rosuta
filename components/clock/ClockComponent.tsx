@@ -57,7 +57,7 @@ export default function ClockComponent({
     try {
       const actualTime = new Date()
 
-      await createClockRecord({
+      const result = await createClockRecord({
         userId: user.id,
         storeId: selectedStoreId,
         type: clockType,
@@ -67,11 +67,17 @@ export default function ClockComponent({
         createdBy: user.id,
       })
 
+      if (result?.error) {
+        console.error('打刻エラー:', result.error)
+        alert(`打刻に失敗しました: ${result.error}`)
+        return
+      }
+
       setIsModalOpen(false)
       router.refresh()
     } catch (error) {
       console.error('打刻エラー:', error)
-      alert('打刻に失敗しました')
+      alert(`打刻に失敗しました: ${error instanceof Error ? error.message : '不明なエラー'}`)
     } finally {
       setIsLoading(false)
     }

@@ -277,7 +277,8 @@ export async function getCurrentWorkStatus(userId: string, storeId: number) {
     return { error: error.message }
   }
 
-  // ステータスを判定
+  // ステータスを判定（承認済みまたは承認不要のレコードを考慮）
+  // まず承認済みのレコードを確認
   let status: 'before_work' | 'working' | 'on_break' | 'finished' = 'before_work'
   let lastRecord = records?.[0]
 
@@ -290,6 +291,32 @@ export async function getCurrentWorkStatus(userId: string, storeId: number) {
       status = 'working'
     } else if (lastRecord.type === 'clock_out') {
       status = 'finished'
+    }
+  } else {
+    // 承認待ちのレコードも確認（pending状態の最新レコード）
+    const { data: pendingRecords } = await supabase
+      .from('clock_records')
+      .select('*')
+      .eq('user_id', userId)
+      .eq('store_id', storeId)
+      .gte('selected_time', `${today}T00:00:00`)
+      .lte('selected_time', `${today}T23:59:59`)
+      .eq('status', 'pending')
+      .order('selected_time', { ascending: false })
+      .limit(1)
+
+    if (pendingRecords && pendingRecords.length > 0) {
+      lastRecord = pendingRecords[0]
+      // pending状態でもステータスは表示する（承認待ちであることを示すため）
+      if (lastRecord.type === 'clock_in') {
+        status = 'working'
+      } else if (lastRecord.type === 'break_start') {
+        status = 'on_break'
+      } else if (lastRecord.type === 'break_end') {
+        status = 'working'
+      } else if (lastRecord.type === 'clock_out') {
+        status = 'finished'
+      }
     }
   }
 
