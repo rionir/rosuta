@@ -67,8 +67,8 @@ export async function createClockRecord(input: CreateClockRecordInput) {
   if (data?.store_id) {
     revalidateTag(`clock-records-store-${data.store_id}`, 'max')
   }
-  revalidatePath('/clock')
-  revalidatePath('/admin/clock-records')
+  revalidatePath('/app/clock')
+  revalidatePath('/app/admin/clock-records')
   return { data }
 }
 
@@ -133,8 +133,8 @@ export async function updateClockRecord(input: UpdateClockRecordInput) {
   if (data?.store_id) {
     revalidateTag(`clock-records-store-${data.store_id}`, 'max')
   }
-  revalidatePath('/clock')
-  revalidatePath('/admin/clock-records')
+  revalidatePath('/app/clock')
+  revalidatePath('/app/admin/clock-records')
   return { data }
 }
 
@@ -166,7 +166,7 @@ export async function approveClockRecord(
   if (data?.store_id) {
     revalidateTag(`clock-records-store-${data.store_id}`, 'max')
   }
-  revalidatePath('/admin/clock-records')
+  revalidatePath('/app/admin/clock-records')
   return { data }
 }
 

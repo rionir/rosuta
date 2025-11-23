@@ -66,7 +66,7 @@ export default function ClockRecordsApprovalComponent({
     setSelectedStore(newStoreId)
     const params = new URLSearchParams()
     if (newStoreId) params.set('storeId', newStoreId.toString())
-    router.push(`/admin/clock-records?${params.toString()}`)
+    router.push(`/app/admin/clock-records?${params.toString()}`)
   }
 
   const handleApprove = async (recordId: number, status: 'approved' | 'rejected') => {

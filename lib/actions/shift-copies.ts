@@ -196,7 +196,7 @@ export async function copyShifts(input: CopyShiftsInput) {
     overwrite: input.overwrite,
   })
 
-  revalidatePath('/admin/shifts')
+  revalidatePath('/app/admin/shifts')
   return { data: { copied, skipped } }
 }
 

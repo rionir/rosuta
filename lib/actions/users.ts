@@ -78,7 +78,7 @@ export async function createUser(input: CreateUserInput) {
     return { error: companyUserError.message }
   }
 
-  revalidatePath('/admin/users')
+  revalidatePath('/app/admin/users')
   return { data: { userId: authData.user.id } }
 }
 
@@ -121,7 +121,7 @@ export async function updateUser(input: UpdateUserInput) {
     }
   }
 
-  revalidatePath('/admin/users')
+  revalidatePath('/app/admin/users')
   return { data: { success: true } }
 }
 
@@ -141,7 +141,7 @@ export async function deleteUser(userId: string) {
     return { error: error.message }
   }
 
-  revalidatePath('/admin/users')
+  revalidatePath('/app/admin/users')
   return { data: { success: true } }
 }
 

@@ -64,7 +64,7 @@ export default async function ShiftsManagementPage({
 
   // storeIdが指定されていない場合、URLにリダイレクトしてstoreIdを追加
   if (!params.storeId && selectedStoreId) {
-    redirect(`/admin/shifts?storeId=${selectedStoreId}&year=${year}&month=${month}`)
+    redirect(`/app/admin/shifts?storeId=${selectedStoreId}&year=${year}&month=${month}`)
   }
 
   // 選択された店舗のユーザー一覧を取得

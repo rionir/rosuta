@@ -39,7 +39,7 @@ export async function createCompany(input: CreateCompanyInput) {
     return { error: error.message }
   }
 
-  revalidatePath('/admin/companies')
+  revalidatePath('/app/admin/companies')
   return { data }
 }
 
@@ -72,7 +72,7 @@ export async function updateCompany(input: UpdateCompanyInput) {
     return { error: error.message }
   }
 
-  revalidatePath('/admin/companies')
+  revalidatePath('/app/admin/companies')
   return { data }
 }
 

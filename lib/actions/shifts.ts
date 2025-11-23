@@ -41,8 +41,8 @@ export async function createShift(input: CreateShiftInput) {
 
   // キャッシュを無効化
   revalidateTag(`shifts-store-${input.storeId}`, 'max')
-  revalidatePath('/shifts')
-  revalidatePath('/admin/shifts')
+  revalidatePath('/app/shifts')
+  revalidatePath('/app/admin/shifts')
   return { 
     data: { 
       id: data.id, 
@@ -82,8 +82,8 @@ export async function updateShift(input: UpdateShiftInput) {
   if (data) {
     revalidateTag(`shifts-store-${data.store_id}`, 'max')
   }
-  revalidatePath('/shifts')
-  revalidatePath('/admin/shifts')
+  revalidatePath('/app/shifts')
+  revalidatePath('/app/admin/shifts')
   return { data }
 }
 
@@ -113,8 +113,8 @@ export async function deleteShift(shiftId: number) {
   if (shiftData) {
     revalidateTag(`shifts-store-${shiftData.store_id}`, 'max')
   }
-  revalidatePath('/shifts')
-  revalidatePath('/admin/shifts')
+  revalidatePath('/app/shifts')
+  revalidatePath('/app/admin/shifts')
   return { data: { success: true } }
 }
 

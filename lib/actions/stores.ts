@@ -41,7 +41,7 @@ export async function createStore(input: CreateStoreInput) {
     approval_required: false,
   })
 
-  revalidatePath('/admin/stores')
+  revalidatePath('/app/admin/stores')
   return { data }
 }
 
@@ -66,7 +66,7 @@ export async function updateStore(input: UpdateStoreInput) {
     return { error: error.message }
   }
 
-  revalidatePath('/admin/stores')
+  revalidatePath('/app/admin/stores')
   return { data }
 }
 

@@ -24,7 +24,7 @@ export default function CalendarStoreSelect({ stores, selectedStoreId }: StoreSe
     } else {
       params.delete('storeId')
     }
-    router.push(`/shifts?${params.toString()}`)
+    router.push(`/app/shifts?${params.toString()}`)
   }
 
   return (

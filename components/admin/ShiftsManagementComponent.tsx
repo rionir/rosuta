@@ -70,7 +70,7 @@ export default function ShiftsManagementComponent({
     if (newStoreId) params.set('storeId', newStoreId.toString())
     params.set('year', year.toString())
     params.set('month', month.toString())
-    router.push(`/admin/shifts?${params.toString()}`)
+    router.push(`/app/admin/shifts?${params.toString()}`)
   }
 
   const handleCreate = async (formData: FormData) => {
@@ -255,7 +255,7 @@ export default function ShiftsManagementComponent({
     if (selectedStore) params.set('storeId', selectedStore.toString())
     params.set('year', newDate.getFullYear().toString())
     params.set('month', (newDate.getMonth() + 1).toString())
-    router.push(`/admin/shifts?${params.toString()}`)
+    router.push(`/app/admin/shifts?${params.toString()}`)
   }
 
   return (

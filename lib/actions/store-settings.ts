@@ -25,8 +25,8 @@ export async function updateStoreSettings(input: UpdateStoreSettingsInput) {
     return { error: error.message }
   }
 
-  revalidatePath('/admin/stores')
-  revalidatePath('/admin/settings')
+  revalidatePath('/app/admin/stores')
+  revalidatePath('/app/admin/settings')
   return { data: { id: data.id, store_id: data.store_id, approval_required: data.approval_required } }
 }
 

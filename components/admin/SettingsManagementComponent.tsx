@@ -42,7 +42,7 @@ export default function SettingsManagementComponent({
     setSelectedStore(newStoreId)
     const params = new URLSearchParams()
     if (newStoreId) params.set('storeId', newStoreId.toString())
-    router.push(`/admin/settings?${params.toString()}`)
+    router.push(`/app/admin/settings?${params.toString()}`)
   }
 
   const handleUpdate = async (formData: FormData) => {

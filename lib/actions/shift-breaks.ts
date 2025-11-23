@@ -35,8 +35,8 @@ export async function createShiftBreak(input: CreateShiftBreakInput) {
     return { error: error.message }
   }
 
-  revalidatePath('/shifts')
-  revalidatePath('/admin/shifts')
+  revalidatePath('/app/shifts')
+  revalidatePath('/app/admin/shifts')
   return { data }
 }
 
@@ -61,8 +61,8 @@ export async function updateShiftBreak(input: UpdateShiftBreakInput) {
     return { error: error.message }
   }
 
-  revalidatePath('/shifts')
-  revalidatePath('/admin/shifts')
+  revalidatePath('/app/shifts')
+  revalidatePath('/app/admin/shifts')
   return { data }
 }
 
@@ -81,8 +81,8 @@ export async function deleteShiftBreak(breakId: number) {
     return { error: error.message }
   }
 
-  revalidatePath('/shifts')
-  revalidatePath('/admin/shifts')
+  revalidatePath('/app/shifts')
+  revalidatePath('/app/admin/shifts')
   return { data: { success: true } }
 }
 

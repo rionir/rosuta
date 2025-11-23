@@ -186,7 +186,7 @@ export default function AdminCalendarComponent({
     const params = new URLSearchParams(searchParams.toString())
     params.set('year', newDate.getFullYear().toString())
     params.set('month', (newDate.getMonth() + 1).toString())
-    router.push(`/admin/calendar?${params.toString()}`)
+    router.push(`/app/admin/calendar?${params.toString()}`)
   }
 
   const handleNextMonth = () => {
@@ -194,14 +194,14 @@ export default function AdminCalendarComponent({
     const params = new URLSearchParams(searchParams.toString())
     params.set('year', newDate.getFullYear().toString())
     params.set('month', (newDate.getMonth() + 1).toString())
-    router.push(`/admin/calendar?${params.toString()}`)
+    router.push(`/app/admin/calendar?${params.toString()}`)
   }
 
   const handleStoreChange = (storeId: number) => {
     const params = new URLSearchParams(searchParams.toString())
     params.set('storeId', storeId.toString())
     params.delete('userId') // 店舗変更時はユーザーフィルターをリセット
-    router.push(`/admin/calendar?${params.toString()}`)
+    router.push(`/app/admin/calendar?${params.toString()}`)
   }
 
   const handleUserChange = (userId: string | undefined) => {
@@ -211,7 +211,7 @@ export default function AdminCalendarComponent({
     } else {
       params.delete('userId')
     }
-    router.push(`/admin/calendar?${params.toString()}`)
+    router.push(`/app/admin/calendar?${params.toString()}`)
   }
 
 
@@ -369,7 +369,7 @@ export default function AdminCalendarComponent({
                   const params = new URLSearchParams(searchParams.toString())
                   params.set('year', today.getFullYear().toString())
                   params.set('month', (today.getMonth() + 1).toString())
-                  router.push(`/admin/calendar?${params.toString()}`)
+                  router.push(`/app/admin/calendar?${params.toString()}`)
                 }}
                 className="rounded-lg px-3 py-1.5 text-sm font-medium text-gray-700 transition-all hover:bg-blue-100 hover:text-blue-700"
               >

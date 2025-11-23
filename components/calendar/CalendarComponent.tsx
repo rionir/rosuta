@@ -144,7 +144,7 @@ export default function CalendarComponent({
     const params = new URLSearchParams(searchParams.toString())
     params.set('year', newDate.getFullYear().toString())
     params.set('month', (newDate.getMonth() + 1).toString())
-    router.push(`/shifts?${params.toString()}`)
+    router.push(`/app/shifts?${params.toString()}`)
   }
 
   const handleNextMonth = () => {
@@ -152,7 +152,7 @@ export default function CalendarComponent({
     const params = new URLSearchParams(searchParams.toString())
     params.set('year', newDate.getFullYear().toString())
     params.set('month', (newDate.getMonth() + 1).toString())
-    router.push(`/shifts?${params.toString()}`)
+    router.push(`/app/shifts?${params.toString()}`)
   }
 
   // 日付ごとのデータを取得
@@ -327,7 +327,7 @@ export default function CalendarComponent({
                   const params = new URLSearchParams(searchParams.toString())
                   params.set('year', today.getFullYear().toString())
                   params.set('month', (today.getMonth() + 1).toString())
-                  router.push(`/shifts?${params.toString()}`)
+                  router.push(`/app/shifts?${params.toString()}`)
                 }}
                 className="rounded-lg px-3 py-1.5 text-sm font-medium text-gray-700 transition-all hover:bg-blue-100 hover:text-blue-700 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-gray-100"
               >

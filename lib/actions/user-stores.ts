@@ -47,14 +47,14 @@ export async function assignUserToStore(input: AssignUserToStoreInput) {
 
       // キャッシュを無効化
       revalidateTag(`store-users-${input.storeId}`, 'max')
-      revalidatePath('/admin/users')
+      revalidatePath('/app/admin/users')
       return { data: updateData }
     }
 
     return { error: error.message }
   }
 
-  revalidatePath('/admin/users')
+  revalidatePath('/app/admin/users')
   return { data }
 }
 
@@ -80,7 +80,7 @@ export async function updateUserStore(input: UpdateUserStoreInput) {
   if (data) {
     revalidateTag(`store-users-${data.store_id}`, 'max')
   }
-  revalidatePath('/admin/users')
+  revalidatePath('/app/admin/users')
   return { data }
 }
 

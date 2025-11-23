@@ -228,7 +228,7 @@ export default function Navigation({ user, isAdmin }: NavigationProps) {
 
 function NavLink({ href, label, pathname }: { href: string; label: string; pathname: string }) {
   const isActive = pathname === href || pathname.startsWith(href + '/')
-  const isAdminPage = pathname.startsWith('/admin')
+  const isAdminPage = pathname.startsWith('/app/admin')
   
   // 管理画面の場合は紫色のスタイルを使用
   if (isAdminPage) {
@@ -272,7 +272,7 @@ function SidebarNavLink({
   onClick: () => void
 }) {
   const isActive = pathname === href || pathname.startsWith(href + '/')
-  const isAdminPage = pathname.startsWith('/admin')
+  const isAdminPage = pathname.startsWith('/app/admin')
   
   // 管理画面の場合は紫色のスタイルを使用
   if (isAdminPage) {
