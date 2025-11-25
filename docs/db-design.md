@@ -5,7 +5,8 @@
 | カラム名    | 型        | 説明                         |
 |------------|-----------|------------------------------|
 | id         | uuid      | auth.users.id（主キー）       |
-| name       | text      | 氏名                         |
+| last_name  | text      | 姓                           |
+| first_name | text      | 名                           |
 | created_at | timestamp | 作成日時                     |
 | updated_at | timestamp | 更新日時                     |
 
@@ -69,30 +70,31 @@
 
 ## 6. shifts（シフト予定）
 
-| カラム名         | 型         | 説明                                         |
-|-----------------|------------|----------------------------------------------|
-| id              | serial     | 主キー                                       |
-| user_id         | uuid       | users.id（FK）                               |
-| store_id        | int        | company_stores.id（FK）                      |
-| date            | date       | シフト日                                     |
-| scheduled_start | time       | 出勤予定時刻                                 |
-| scheduled_end   | time       | 退勤予定時刻                                 |
-| created_by      | uuid       | 登録者ID（管理者）                           |
-| created_at      | timestamp  | 作成日時                                     |
-| updated_at      | timestamp  | 更新日時                                     |
+| カラム名         | 型                        | 説明                                         |
+|-----------------|---------------------------|----------------------------------------------|
+| id              | serial                    | 主キー                                       |
+| user_id         | uuid                      | users.id（FK）                               |
+| store_id        | int                       | company_stores.id（FK）                      |
+| scheduled_start | timestamp with time zone | 出勤予定時刻（JSTタイムゾーン対応、日付・時刻を含む）|
+| scheduled_end   | timestamp with time zone  | 退勤予定時刻（JSTタイムゾーン対応、夜勤対応、日付・時刻を含む）|
+| created_by      | uuid                      | 登録者ID（管理者）                           |
+| created_at      | timestamp                 | 作成日時                                     |
+| updated_at      | timestamp                 | 更新日時                                     |
+
+> **注意**: `date`カラムは削除され、`scheduled_start`と`scheduled_end`に日付・時刻の両方が含まれます。夜勤対応のため、`scheduled_end`が翌日になる場合があります。
 
 ---
 
 ## 7. shift_breaks（休憩予定・複数対応）
 
-| カラム名         | 型         | 説明                                         |
-|-----------------|------------|----------------------------------------------|
-| id              | serial     | 主キー                                       |
-| shift_id        | int        | shifts.id（FK）                              |
-| break_start     | time       | 休憩開始予定                                 |
-| break_end       | time       | 休憩終了予定                                 |
-| created_at      | timestamp  | 作成日時                                     |
-| updated_at      | timestamp  | 更新日時                                     |
+| カラム名         | 型                        | 説明                                         |
+|-----------------|---------------------------|----------------------------------------------|
+| id              | serial                    | 主キー                                       |
+| shift_id        | int                       | shifts.id（FK）                              |
+| break_start     | timestamp with time zone  | 休憩開始予定（JSTタイムゾーン対応）          |
+| break_end       | timestamp with time zone  | 休憩終了予定（JSTタイムゾーン対応）          |
+| created_at      | timestamp                 | 作成日時                                     |
+| updated_at      | timestamp                 | 更新日時                                     |
 
 ---
 

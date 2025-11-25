@@ -14,6 +14,20 @@ alwaysApply: true
   - `docs/process.md` - 開発プロセス
 - これらのドキュメントを確認することで、プロジェクトのガイドラインや仕様を把握し、一貫性のある実装が可能になります
 
+## ブラウザ自動化・動作確認
+
+### ブラウザツールの使用
+- **Chrome DevTools MCPを使用**: ブラウザの自動化や動作確認には、Playwrightではなく**Chrome DevTools MCP（cursor-browser-extension）**を使用してください
+- **使用するツール**:
+  - `mcp_cursor-browser-extension_browser_navigate` - ページ遷移
+  - `mcp_cursor-browser-extension_browser_snapshot` - ページのスナップショット取得
+  - `mcp_cursor-browser-extension_browser_click` - 要素のクリック
+  - `mcp_cursor-browser-extension_browser_type` - テキスト入力
+  - `mcp_cursor-browser-extension_browser_take_screenshot` - スクリーンショット取得
+  - その他の`mcp_cursor-browser-extension_*`ツール
+- **Playwrightは使用しない**: `mcp_next-devtools_browser_eval`などのPlaywrightベースのツールは使用しないでください
+- **Next.js MCPツール**: Next.js開発サーバーの診断には`mcp_next-devtools_nextjs_runtime`を使用できます
+
 ## 技術スタック別のルール
 
 このプロジェクトでは、以下の技術スタック別のルールファイルが設定されています：
