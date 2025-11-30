@@ -31,6 +31,9 @@ SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
 NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=your_stripe_publishable_key
 STRIPE_SECRET_KEY=your_stripe_secret_key
 STRIPE_WEBHOOK_SECRET=your_stripe_webhook_secret
+
+# Google Analytics (GA4)
+NEXT_PUBLIC_GA_MEASUREMENT_ID=your_ga_measurement_id
 ```
 
 > ⚠️ **重要**: `SUPABASE_SERVICE_ROLE_KEY`はサーバーサイドでのみ使用します。絶対にクライアントに露出しないでください。

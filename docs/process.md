@@ -13,6 +13,7 @@
   - ✅ カレンダーUI改善: 月ナビゲーションのUI改善（<>ボタン、今日ボタン、氏名スペース削除）
   - ✅ レイアウト再構成: app/layout.tsxをルートレイアウトのみに簡素化、NavigationWrapperをapp/app/layout.tsxに移動
   - ✅ ランディングページ改善: 店舗対応の強調を削除、シンプルで使いやすいを強調、主要機能セクションで複数店舗対応を明記
+  - ✅ Analytics設定: Google Analytics (GA4)、Vercel Analytics、Vercel Speed Insightsを設定
 - **残りタスク**: T016〜T018 (3タスク)
   - T016: Stripe課金管理
   - T017: 単体テスト
