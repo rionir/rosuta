@@ -1,6 +1,6 @@
-import { getCurrentUser } from '@/lib/actions/auth'
-import { getUserStores } from '@/lib/actions/user-stores'
-import { getCurrentWorkStatus } from '@/lib/actions/clock-records'
+import { getCurrentUser } from '@/presentation/auth/actions/auth'
+import { getUserStores } from '@/presentation/store/actions/user-stores'
+import { getCurrentWorkStatus } from '@/presentation/clock-record/actions/clock-records'
 import { redirect } from 'next/navigation'
 import ClockComponent from '@/components/clock/ClockComponent'
 
@@ -12,11 +12,13 @@ export default async function ClockPage({
 }: {
   searchParams: Promise<{ storeId?: string }>
 }) {
-  const { data: user } = await getCurrentUser()
+  const userResult = await getCurrentUser()
 
-  if (!user) {
+  if ('error' in userResult || !userResult.data) {
     redirect('/app/login')
   }
+
+  const user = userResult.data
 
   // ユーザーが所属する店舗一覧を取得
   const { data: userStores } = await getUserStores(user.id)

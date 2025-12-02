@@ -2,7 +2,8 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { createStore, updateStore } from '@/lib/actions/stores'
+import { createStore, updateStore } from '@/presentation/store/actions/stores'
+import { StoreDTO } from '@/presentation/store/dto/store-dto'
 
 interface StoresManagementComponentProps {
   user: {
@@ -13,12 +14,7 @@ interface StoresManagementComponentProps {
     }
   }
   companyId: number
-  stores: Array<{
-    id: number
-    name: string
-    address?: string
-    created_at: string
-  }>
+  stores: StoreDTO[]
 }
 
 export default function StoresManagementComponent({

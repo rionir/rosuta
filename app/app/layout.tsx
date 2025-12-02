@@ -9,10 +9,11 @@ export default async function AppLayout({
 }
 
 async function NavigationWrapper({ children }: { children: React.ReactNode }) {
-  const { getCurrentUser, isUserAdmin } = await import('@/lib/actions/auth')
+  const { getCurrentUser, isUserAdmin } = await import('@/presentation/auth/actions/auth')
   const { headers } = await import('next/headers')
   
-  const { data: user } = await getCurrentUser()
+  const userResult = await getCurrentUser()
+  const user = !('error' in userResult) ? userResult.data : null
   const headersList = await headers()
   const pathname = headersList.get('x-pathname') || ''
 

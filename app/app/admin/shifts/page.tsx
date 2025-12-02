@@ -1,8 +1,8 @@
-import { getCurrentUser, isUserAdmin } from '@/lib/actions/auth'
-import { getUserCompanies } from '@/lib/actions/auth'
-import { getCompanyStores } from '@/lib/actions/stores'
-import { getStoreUsers } from '@/lib/actions/user-stores'
-import { getStoreShifts } from '@/lib/actions/shifts'
+import { getCurrentUser, isUserAdmin } from '@/presentation/auth/actions/auth'
+import { getUserCompanies } from '@/presentation/auth/actions/auth'
+import { getCompanyStores } from '@/presentation/store/actions/stores'
+import { getStoreUsers } from '@/presentation/store/actions/user-stores'
+import { getStoreShifts } from '@/presentation/shift/actions/shifts'
 import { redirect } from 'next/navigation'
 import ShiftsManagementComponent from '@/components/admin/ShiftsManagementComponent'
 
@@ -14,11 +14,11 @@ export default async function ShiftsManagementPage({
 }: {
   searchParams: Promise<{ storeId?: string; year?: string; month?: string }>
 }) {
-  const { data: user } = await getCurrentUser()
-
-  if (!user) {
+  const userResult = await getCurrentUser()
+  if ('error' in userResult || !userResult.data) {
     redirect('/app/login')
   }
+  const user = userResult.data
 
   // 管理者権限チェック
   const isAdmin = await isUserAdmin(user.id)
@@ -83,7 +83,7 @@ export default async function ShiftsManagementPage({
   // ユーザー情報をマップに変換（storeUsersから取得）
   const userMap = new Map<string, { id: string; last_name: string; first_name: string }>()
   if (storeUsers.data) {
-    storeUsers.data.forEach((item: any) => {
+    storeUsers.data.forEach((item: { user_id: string; users: { id: string; last_name: string; first_name: string } | null }) => {
       // usersがオブジェクトの場合と配列の場合の両方に対応
       const userInfo = item.users && !Array.isArray(item.users) ? item.users : null
       if (userInfo && userInfo.id && userInfo.last_name) {
@@ -102,13 +102,16 @@ export default async function ShiftsManagementPage({
   console.log('shifts count:', shiftsResult.data?.length || 0)
 
   // シフトデータにユーザー情報をマージ
-  const shifts = shiftsResult.data?.map((shift: any) => {
+  const shifts = (shiftsResult.data || []).map((shift) => {
     const userInfo = userMap.get(shift.user_id)
+    if (!userInfo) {
+      return null
+    }
     return {
       ...shift,
-      users: userInfo || null,
+      users: userInfo,
     }
-  }) || []
+  }).filter((shift): shift is typeof shift & { users: { id: string; last_name: string; first_name: string } } => shift !== null) || []
 
   return (
     <ShiftsManagementComponent

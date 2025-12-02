@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation'
-import { getCurrentUser } from '@/lib/actions/auth'
+import { getCurrentUser } from '@/presentation/auth/actions/auth'
 import LoginForm from '@/components/auth/LoginForm'
 
 // 認証が必要なページのため、動的レンダリングを明示
@@ -7,8 +7,8 @@ export const dynamic = 'force-dynamic'
 
 export default async function LoginPage() {
   // 既にログインしている場合はダッシュボードにリダイレクト
-  const { data: user } = await getCurrentUser()
-  if (user) {
+  const userResult = await getCurrentUser()
+  if (!('error' in userResult) && userResult.data) {
     redirect('/app/dashboard')
   }
 

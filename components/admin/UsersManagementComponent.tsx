@@ -2,9 +2,11 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { createUser, updateUser, deleteUser } from '@/lib/actions/users'
-import { assignUserToStore, updateUserStore, getUserStores } from '@/lib/actions/user-stores'
+import { createUser, updateUser, deleteUser } from '@/presentation/user/actions/users'
+import { assignUserToStore, updateUserStore, getUserStores } from '@/presentation/store/actions/user-stores'
 import { formatUserName } from '@/lib/utils/user-name'
+import { CompanyUserDTO } from '@/presentation/user/dto/company-user-dto'
+import { StoreDTO } from '@/presentation/store/dto/store-dto'
 
 interface UsersManagementComponentProps {
   user: {
@@ -15,23 +17,8 @@ interface UsersManagementComponentProps {
     }
   }
   companyId: number
-  users: Array<{
-    user_id: string
-    is_admin: boolean
-    is_active: boolean
-    created_at: string
-    users: {
-      id: string
-      last_name: string
-      first_name: string
-      created_at: string
-    }
-  }>
-  stores: Array<{
-    id: number
-    name: string
-    address?: string
-  }>
+  users: CompanyUserDTO[]
+  stores: StoreDTO[]
 }
 
 export default function UsersManagementComponent({

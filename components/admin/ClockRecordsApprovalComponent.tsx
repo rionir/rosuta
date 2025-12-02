@@ -2,8 +2,10 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { approveClockRecord } from '@/lib/actions/clock-records'
+import { approveClockRecord } from '@/presentation/clock-record/actions/clock-records'
 import { formatUserName } from '@/lib/utils/user-name'
+import { StoreDTO } from '@/presentation/store/dto/store-dto'
+import { ClockRecordWithUserDTO } from '@/presentation/clock-record/dto/clock-record-dto'
 
 interface ClockRecordsApprovalComponentProps {
   user: {
@@ -13,28 +15,9 @@ interface ClockRecordsApprovalComponentProps {
       name: string
     }
   }
-  stores: Array<{
-    id: number
-    name: string
-    address?: string
-  }>
+  stores: StoreDTO[]
   selectedStoreId?: number
-  pendingRecords: Array<{
-    id: number
-    user_id: string
-    store_id: number
-    type: 'clock_in' | 'clock_out' | 'break_start' | 'break_end'
-    selected_time: string
-    actual_time: string
-    method: 'scheduled' | 'current' | 'manual'
-    status: 'pending' | 'approved' | 'rejected'
-    created_at: string
-    users: {
-      id: string
-      last_name: string
-      first_name: string
-    }
-  }>
+  pendingRecords: ClockRecordWithUserDTO[]
 }
 
 const typeLabels: Record<string, string> = {

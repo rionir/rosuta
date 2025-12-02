@@ -1,4 +1,4 @@
-import { getCurrentUser, isUserAdmin } from '@/lib/actions/auth'
+import { getCurrentUser, isUserAdmin } from '@/presentation/auth/actions/auth'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 
@@ -6,47 +6,43 @@ import Link from 'next/link'
 export const dynamic = 'force-dynamic'
 
 export default async function DashboardPage() {
-  try {
-    const { data: user } = await getCurrentUser()
+  const userResult = await getCurrentUser()
 
-    if (!user) {
-      redirect('/app/login')
-    }
-
-    const isAdmin = await isUserAdmin(user.id)
-
-    return (
-      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        {/* Feature Cards */}
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          <FeatureCard
-            href="/app/clock"
-            title="打刻"
-            description="出勤・退勤・休憩の打刻を行います"
-            icon="clock"
-          />
-          <FeatureCard
-            href="/app/shifts"
-            title="シフト"
-            description="シフトの確認と管理を行います"
-            icon="shifts"
-          />
-          {isAdmin && (
-            <FeatureCard
-              href="/app/admin"
-              title="管理"
-              description="店舗・スタッフ・設定の管理を行います"
-              icon="admin"
-            />
-          )}
-        </div>
-      </div>
-    )
-  } catch (error) {
-    // エラーが発生した場合はログインページにリダイレクト
-    console.error('Dashboard page error:', error)
+  if ('error' in userResult || !userResult.data) {
     redirect('/app/login')
   }
+
+  const user = userResult.data
+
+  const isAdmin = await isUserAdmin(user.id)
+
+  return (
+    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+      {/* Feature Cards */}
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <FeatureCard
+          href="/app/clock"
+          title="打刻"
+          description="出勤・退勤・休憩の打刻を行います"
+          icon="clock"
+        />
+        <FeatureCard
+          href="/app/shifts"
+          title="シフト"
+          description="シフトの確認と管理を行います"
+          icon="shifts"
+        />
+        {isAdmin && (
+          <FeatureCard
+            href="/app/admin"
+            title="管理"
+            description="店舗・スタッフ・設定の管理を行います"
+            icon="admin"
+          />
+        )}
+      </div>
+    </div>
+  )
 }
 
 function FeatureCard({
