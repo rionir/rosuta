@@ -1,20 +1,15 @@
 'use client'
 
 import Link from 'next/link'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, startTransition } from 'react'
 import { usePathname } from 'next/navigation'
 import { signOut } from '@/presentation/auth/actions/auth'
 import { ThemeToggle } from '@/components/theme/ThemeToggle'
 
+import { CurrentUserDTO } from '@/presentation/auth/dto/current-user-dto'
+
 interface NavigationProps {
-  user: {
-    id: string
-    email?: string
-    profile?: {
-      last_name?: string | null
-      first_name?: string | null
-    } | null
-  }
+  user: CurrentUserDTO
   isAdmin: boolean
 }
 
@@ -27,7 +22,10 @@ export default function Navigation({ user, isAdmin }: NavigationProps) {
 
   // パスが変更されたらサイドバーを閉じる
   useEffect(() => {
-    closeSidebar()
+    // pathnameが変更されたときにサイドバーを閉じる（非緊急の更新として扱う）
+    startTransition(() => {
+      setIsSidebarOpen(false)
+    })
   }, [pathname])
 
   // オーバーレイクリックでサイドバーを閉じる
@@ -84,9 +82,7 @@ export default function Navigation({ user, isAdmin }: NavigationProps) {
           <div className="flex items-center space-x-4">
             <ThemeToggle />
             <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-              {user.profile?.last_name && user.profile?.first_name 
-                ? `${user.profile.last_name} ${user.profile.first_name}` 
-                : userEmail}
+              {user.profile?.name || userEmail}
               </span>
             <form action={async () => {
               await signOut()
@@ -203,9 +199,7 @@ export default function Navigation({ user, isAdmin }: NavigationProps) {
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-gray-900 truncate dark:text-gray-100">
-                {user.profile?.last_name && user.profile?.first_name 
-                  ? `${user.profile.last_name} ${user.profile.first_name}` 
-                  : userEmail}
+                {user.profile?.name || userEmail}
               </p>
               <p className="text-xs text-gray-500 truncate dark:text-gray-400">{userEmail}</p>
             </div>

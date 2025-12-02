@@ -1,7 +1,7 @@
 'use client'
 
 import { useTheme } from 'next-themes'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, startTransition } from 'react'
 
 export function ThemeToggle() {
   const { theme, setTheme, resolvedTheme } = useTheme()
@@ -9,7 +9,10 @@ export function ThemeToggle() {
 
   // マウント後にレンダリング（ハイドレーションエラーを防ぐ）
   useEffect(() => {
-    setMounted(true)
+    // マウント状態を非緊急の更新として扱う
+    startTransition(() => {
+      setMounted(true)
+    })
   }, [])
 
   if (!mounted) {

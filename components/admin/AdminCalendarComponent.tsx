@@ -8,13 +8,6 @@ import { UserStoreWithStoreDTO } from '@/presentation/store/dto/store-dto'
 import { UserStoreDTO } from '@/presentation/store/dto/store-dto'
 
 interface AdminCalendarComponentProps {
-  user: {
-    id: string
-    email?: string
-    profile?: {
-      name: string
-    }
-  }
   stores: UserStoreWithStoreDTO[]
   storeUsers: UserStoreDTO[]
   year: number
@@ -34,7 +27,8 @@ interface AdminCalendarDayData {
       id: string
       last_name: string
       first_name: string
-    }
+      name?: string
+    } | null
   }>
   clockRecords: Array<{
     id: number
@@ -48,12 +42,12 @@ interface AdminCalendarDayData {
       id: string
       last_name: string
       first_name: string
-    }
+      name?: string
+    } | null
   }>
 }
 
 export default function AdminCalendarComponent({
-  user,
   stores,
   storeUsers,
   year,
@@ -205,7 +199,7 @@ export default function AdminCalendarComponent({
 
 
   // シフトの出勤状況を判定
-  const getShiftStatus = (shift: AdminCalendarDayData['shifts'][0], clockRecords: AdminCalendarDayData['clockRecords'], dateStr: string) => {
+  const getShiftStatus = (shift: AdminCalendarDayData['shifts'][0], clockRecords: AdminCalendarDayData['clockRecords']) => {
     const dayRecords = clockRecords.filter(
       (record) => record.user_id === shift.user_id
     )
@@ -322,7 +316,7 @@ export default function AdminCalendarComponent({
                 .filter((storeUser) => storeUser.users !== null)
                 .map((storeUser) => (
                   <option key={storeUser.user_id} value={storeUser.user_id}>
-                    {formatUserName(storeUser.users!, { noSpace: true })}
+                    {formatUserName(storeUser.users, { noSpace: true })}
                   </option>
                 ))}
             </select>
@@ -488,7 +482,7 @@ export default function AdminCalendarComponent({
                       <div className="flex flex-col gap-0.5 px-0.5">
                         {/* シフトがあるユーザー */}
                         {sortedShifts.map((shift) => {
-                          const status = getShiftStatus(shift, dayData.clockRecords, dateStr)
+                          const status = getShiftStatus(shift, dayData.clockRecords)
                           const statusColor = getStatusColor(status, dateStr)
                           return (
                             <div
@@ -497,8 +491,8 @@ export default function AdminCalendarComponent({
                             >
                               <span className="block whitespace-normal break-words">
                                 {showTimeDetails
-                                  ? `${shift.users ? formatUserName(shift.users, { noSpace: true }) : '不明'} ${new Date(shift.scheduled_start).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })}-${new Date(shift.scheduled_end).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })}`
-                                  : shift.users ? formatUserName(shift.users, { noSpace: true }) : '不明'}
+                                  ? `${formatUserName(shift.users, { noSpace: true })} ${new Date(shift.scheduled_start).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })}-${new Date(shift.scheduled_end).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })}`
+                                  : formatUserName(shift.users, { noSpace: true })}
                               </span>
                             </div>
                           )
@@ -515,8 +509,8 @@ export default function AdminCalendarComponent({
                             >
                               <span className="block whitespace-normal break-words">
                                 {showTimeDetails && clockInTime
-                                  ? `${record.users ? formatUserName(record.users, { noSpace: true }) : '不明'} ${clockInTime}`
-                                  : record.users ? formatUserName(record.users, { noSpace: true }) : '不明'}
+                                  ? `${formatUserName(record.users, { noSpace: true })} ${clockInTime}`
+                                  : formatUserName(record.users, { noSpace: true })}
                               </span>
                             </div>
                           )

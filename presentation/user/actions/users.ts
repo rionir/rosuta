@@ -7,25 +7,25 @@ import { SupabaseUserRepository } from '@/infrastructure/repositories/user/supab
 import { CreateUserUseCase } from '@/application/user/use-cases/create-user-use-case'
 import { UpdateUserUseCase } from '@/application/user/use-cases/update-user-use-case'
 import { DeleteUserUseCase } from '@/application/user/use-cases/delete-user-use-case'
-import { GetCompanyUsersUseCase } from '@/application/user/use-cases/get-company-users-use-case'
 import { GetCompanyUsersWithUsersUseCase } from '@/application/user/use-cases/get-company-users-with-users-use-case'
 import { CreateUserDTO } from '@/application/user/dto/create-user-dto'
 import { UpdateUserDTO } from '@/application/user/dto/update-user-dto'
 import { ErrorHandler } from '@/presentation/common/error-handler'
 import { CompanyUserDTO } from '@/presentation/user/dto/company-user-dto'
 
-// 既存のインターフェースを維持（後方互換性）
 export interface CreateUserInput {
   email: string
   password: string
-  name: string
+  last_name: string
+  first_name: string
   companyId: number
   isAdmin?: boolean
 }
 
 export interface UpdateUserInput {
   userId: string
-  name?: string
+  last_name?: string
+  first_name?: string
   isAdmin?: boolean
   isActive?: boolean
 }
@@ -43,7 +43,8 @@ export async function createUser(input: CreateUserInput) {
   const dto: CreateUserDTO = {
     email: input.email,
     password: input.password,
-    name: input.name,
+    last_name: input.last_name,
+    first_name: input.first_name,
     companyId: input.companyId,
     isAdmin: input.isAdmin,
   }
@@ -74,7 +75,8 @@ export async function updateUser(input: UpdateUserInput) {
 
   const dto: UpdateUserDTO = {
     userId: input.userId,
-    name: input.name,
+    last_name: input.last_name,
+    first_name: input.first_name,
     isAdmin: input.isAdmin,
     isActive: input.isActive,
   }

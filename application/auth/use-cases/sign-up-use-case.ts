@@ -1,6 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
 import { AuthService } from '@/domain/auth/services/auth-service'
-import { User } from '@/domain/user/entities/user'
 import { Result, Result as R } from '@/domain/common/result'
 import { ValidationError, ExternalServiceError, DatabaseError } from '@/domain/common/errors'
 

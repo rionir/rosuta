@@ -6,17 +6,15 @@ import {
   getUserWorkSummaryByDay,
   getUserWorkSummaryByWeek,
   getUserWorkSummaryByMonth,
+  type WorkSummaryDay,
+  type WorkSummaryWeek,
+  type WorkSummaryMonth,
 } from '@/presentation/work-summary/actions/work-summary'
 import { UserStoreWithStoreDTO } from '@/presentation/store/dto/store-dto'
+import { CurrentUserDTO } from '@/presentation/auth/dto/current-user-dto'
 
 interface WorkSummaryComponentProps {
-  user: {
-    id: string
-    email?: string
-    profile?: {
-      name: string
-    }
-  }
+  user: CurrentUserDTO
   stores: UserStoreWithStoreDTO[]
   year: number
   month: number
@@ -34,7 +32,7 @@ export default function WorkSummaryComponent({
 }: WorkSummaryComponentProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const [summaryData, setSummaryData] = useState<any>(null)
+  const [summaryData, setSummaryData] = useState<WorkSummaryDay[] | WorkSummaryWeek[] | WorkSummaryMonth | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
@@ -212,7 +210,7 @@ export default function WorkSummaryComponent({
           ) : summaryData ? (
             <div className="space-y-6">
               {/* サマリーカード */}
-              {period === 'month' && (
+              {period === 'month' && summaryData && !Array.isArray(summaryData) && 'scheduledHours' in summaryData && (
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                   <div className="rounded-xl border border-blue-200 bg-blue-50 p-6">
                     <div className="text-sm font-medium text-gray-600">予定時間</div>
@@ -260,7 +258,7 @@ export default function WorkSummaryComponent({
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-200 bg-white">
-                      {summaryData.map((day: any) => (
+                      {(summaryData as WorkSummaryDay[]).map((day) => (
                         <tr key={day.date}>
                           <td className="whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-900">
                             {day.date}
@@ -287,7 +285,7 @@ export default function WorkSummaryComponent({
 
               {period === 'week' && Array.isArray(summaryData) && (
                 <div className="space-y-4">
-                  {summaryData.map((week: any) => (
+                  {(summaryData as WorkSummaryWeek[]).map((week) => (
                     <div key={week.weekStart} className="rounded-xl border border-gray-200 bg-white p-6">
                       <div className="mb-4 text-lg font-semibold text-gray-900">
                         {week.weekStart} 〜 {week.weekEnd}

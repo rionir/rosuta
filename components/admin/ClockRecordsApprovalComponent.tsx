@@ -7,14 +7,10 @@ import { formatUserName } from '@/lib/utils/user-name'
 import { StoreDTO } from '@/presentation/store/dto/store-dto'
 import { ClockRecordWithUserDTO } from '@/presentation/clock-record/dto/clock-record-dto'
 
+import { CurrentUserDTO } from '@/presentation/auth/dto/current-user-dto'
+
 interface ClockRecordsApprovalComponentProps {
-  user: {
-    id: string
-    email?: string
-    profile?: {
-      name: string
-    }
-  }
+  user: CurrentUserDTO
   stores: StoreDTO[]
   selectedStoreId?: number
   pendingRecords: ClockRecordWithUserDTO[]

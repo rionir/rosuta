@@ -95,7 +95,7 @@ export class SupabaseCompanyRepository implements ICompanyRepository {
     }
 
     return (data || []).map(
-      (item: any) =>
+      (item) =>
         new Company(
           item.id,
           item.name,

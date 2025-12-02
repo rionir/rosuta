@@ -96,11 +96,6 @@ export default async function ShiftsManagementPage({
     })
   }
 
-  // デバッグログ
-  console.log('storeUsers:', JSON.stringify(storeUsers.data?.slice(0, 2), null, 2))
-  console.log('userMap size:', userMap.size)
-  console.log('shifts count:', shiftsResult.data?.length || 0)
-
   // シフトデータにユーザー情報をマージ
   const shifts = (shiftsResult.data || []).map((shift) => {
     const userInfo = userMap.get(shift.user_id)
@@ -116,7 +111,6 @@ export default async function ShiftsManagementPage({
   return (
     <ShiftsManagementComponent
       user={user}
-      companyId={companyId}
       stores={stores || []}
       storeUsers={storeUsers.data || []}
       shifts={shifts}

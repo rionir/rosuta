@@ -1,5 +1,4 @@
 import { ClockRecord } from '../entities/clock-record'
-import { ClockRecordStatus } from '../value-objects/clock-record-status'
 import { Store } from '@/domain/store/entities/store'
 import { User } from '@/domain/user/entities/user'
 

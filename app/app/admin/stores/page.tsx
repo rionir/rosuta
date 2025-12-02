@@ -48,7 +48,6 @@ export default async function StoresManagementPage() {
 
   return (
     <StoresManagementComponent
-      user={user}
       companyId={companyId}
       stores={stores || []}
     />

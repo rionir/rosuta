@@ -35,11 +35,21 @@ export class CreateUserUseCase {
         )
       }
 
-      if (!dto.name) {
+      // last_nameとfirst_nameのバリデーション
+      if (!dto.last_name || !dto.last_name.trim()) {
         return R.failure(
-          new ValidationError('名前が指定されていません', 'name')
+          new ValidationError('姓（last_name）が指定されていません', 'last_name')
         )
       }
+
+      if (!dto.first_name || !dto.first_name.trim()) {
+        return R.failure(
+          new ValidationError('名（first_name）が指定されていません', 'first_name')
+        )
+      }
+
+      const lastName = dto.last_name.trim()
+      const firstName = dto.first_name.trim()
 
       if (!dto.companyId || dto.companyId <= 0) {
         return R.failure(
@@ -73,10 +83,6 @@ export class CreateUserUseCase {
       const userId = authData.user.id
 
       try {
-        // 3. 名前をlast_nameとfirst_nameに分割
-        const nameParts = dto.name.trim().split(/\s+/)
-        const lastName = nameParts[0] || ''
-        const firstName = nameParts.slice(1).join(' ') || ''
 
         // 4. usersテーブルにプロフィール情報を追加
         const user = new User(

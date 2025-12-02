@@ -10,15 +10,10 @@ import { UserStoreDTO } from '@/presentation/store/dto/store-dto'
 import { ShiftDTO } from '@/presentation/shift/dto/shift-dto'
 import { UserDTO } from '@/presentation/user/dto/user-dto'
 
+import { CurrentUserDTO } from '@/presentation/auth/dto/current-user-dto'
+
 interface ShiftsManagementComponentProps {
-  user: {
-    id: string
-    email?: string
-    profile?: {
-      name: string
-    }
-  }
-  companyId: number
+  user: CurrentUserDTO
   stores: StoreDTO[]
   storeUsers: UserStoreDTO[]
   shifts: Array<ShiftDTO & { users: UserDTO }>
@@ -29,7 +24,6 @@ interface ShiftsManagementComponentProps {
 
 export default function ShiftsManagementComponent({
   user,
-  companyId,
   stores,
   storeUsers,
   shifts: initialShifts,
@@ -545,7 +539,7 @@ export default function ShiftsManagementComponent({
                     ) : (
                       <div className="flex items-center justify-between">
                         <div>
-                          <h3 className="text-lg font-semibold text-gray-900">{shift.users ? formatUserName(shift.users) : 'ユーザー不明'}</h3>
+                          <h3 className="text-lg font-semibold text-gray-900">{formatUserName(shift.users)}</h3>
                           <p className="mt-1 text-sm text-gray-600">
                             {new Date(shift.scheduled_start).toLocaleDateString('ja-JP')} {new Date(shift.scheduled_start).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })} - {new Date(shift.scheduled_end).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })}
                           </p>

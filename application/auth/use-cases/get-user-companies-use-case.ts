@@ -2,6 +2,8 @@ import { IUserRepository } from '@/domain/user/repositories/user-repository'
 import { SupabaseClient } from '@supabase/supabase-js'
 import { Result, Result as R } from '@/domain/common/result'
 import { ValidationError, DatabaseError, ExternalServiceError } from '@/domain/common/errors'
+import { CompanyUser } from '@/domain/user/entities/company-user'
+import { Company } from '@/domain/company/entities/company'
 
 /**
  * GetUserCompaniesUseCase
@@ -13,7 +15,7 @@ export class GetUserCompaniesUseCase {
     private readonly supabase: SupabaseClient
   ) {}
 
-  async execute(userId: string): Promise<Result<Array<{ companyUser: any; company: any | null }>>> {
+  async execute(userId: string): Promise<Result<Array<{ companyUser: CompanyUser; company: Company | null }>>> {
     try {
       // バリデーション
       if (!userId) {
@@ -38,7 +40,7 @@ export class GetUserCompaniesUseCase {
 
       const { data: companies, error } = await this.supabase
         .from('companies')
-        .select('id, name, plan, status')
+        .select('id, name, plan, status, created_at, updated_at')
         .in('id', companyIds)
 
       if (error) {
@@ -48,13 +50,32 @@ export class GetUserCompaniesUseCase {
       }
 
       // 企業所属情報と企業情報をマージ
+      interface CompanyRow {
+        id: number
+        name: string
+        plan: string
+        status: string
+        created_at: string
+        updated_at: string
+      }
       const result = companyUsers
         .filter((cu) => cu.isActive)
         .map((cu) => {
-          const company = companies?.find((c) => c.id === cu.companyId)
+          const companyData = (companies as CompanyRow[] | null)?.find((c) => c.id === cu.companyId)
+          const company = companyData
+            ? new Company(
+                companyData.id,
+                companyData.name,
+                null, // stripe_customer_id
+                companyData.plan,
+                companyData.status,
+                new Date(companyData.created_at),
+                new Date(companyData.updated_at)
+              )
+            : null
           return {
             companyUser: cu,
-            company: company || null,
+            company,
           }
         })
 

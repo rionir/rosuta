@@ -7,11 +7,13 @@ export function formatUserName(
   user: {
     last_name: string
     first_name: string
-  }|null,
+  } | null,
   options?: { noSpace?: boolean }
 ): string {
   const separator = options?.noSpace ? '' : ' '
-  return user?`${user.last_name}${separator}${user.first_name}`.trim():""
+  return user 
+    ? `${user.last_name}${separator}${user.first_name}`.trim()
+    : "不明"
 }
 
 /**

@@ -11,6 +11,8 @@ import { GetUserCompaniesUseCase } from '@/application/auth/use-cases/get-user-c
 import { IsUserAdminUseCase } from '@/application/auth/use-cases/is-user-admin-use-case'
 import { SupabaseUserRepository } from '@/infrastructure/repositories/user/supabase-user-repository'
 import { ErrorHandler } from '@/presentation/common/error-handler'
+import { formatUserName } from '@/lib/utils/user-name'
+import { CurrentUserDTO } from '@/presentation/auth/dto/current-user-dto'
 
 // 既存のインターフェースを維持（後方互換性）
 export interface SignInInput {
@@ -71,7 +73,7 @@ export async function signOut() {
 /**
  * 現在のユーザー情報を取得
  */
-export async function getCurrentUser() {
+export async function getCurrentUser(): Promise<{ data: CurrentUserDTO | null } | { error: string }> {
   const useCase = new GetCurrentUserUseCase()
   const result = await useCase.execute()
   
@@ -81,8 +83,22 @@ export async function getCurrentUser() {
     if (result.data === null) {
       return { data: null }
     }
-    // データがある場合は既存の形式に変換
-    return { data: { ...result.data.user, profile: result.data.profile } }
+    // データがある場合はDTOに変換
+    const dto: CurrentUserDTO = {
+      id: result.data.user.id,
+      email: result.data.user.email,
+      profile: result.data.profile
+        ? {
+            last_name: result.data.profile.last_name,
+            first_name: result.data.profile.first_name,
+            name: formatUserName({
+              last_name: result.data.profile.last_name,
+              first_name: result.data.profile.first_name,
+            }),
+          }
+        : undefined,
+    }
+    return { data: dto }
   }
   
   // エラーの場合はnullを返す（既存のインターフェースとの互換性）

@@ -1,5 +1,5 @@
 import { IClockRecordRepository } from '@/domain/clock-record/repositories/clock-record-repository'
-import { ClockRecordStatus, createClockRecordStatus } from '@/domain/clock-record/value-objects/clock-record-status'
+import { createClockRecordStatus } from '@/domain/clock-record/value-objects/clock-record-status'
 import { Result, Result as R } from '@/domain/common/result'
 import { NotFoundError, ValidationError, DatabaseError } from '@/domain/common/errors'
 import { ClockRecord } from '@/domain/clock-record/entities/clock-record'

@@ -9,20 +9,12 @@ import { CompanyUserDTO } from '@/presentation/user/dto/company-user-dto'
 import { StoreDTO } from '@/presentation/store/dto/store-dto'
 
 interface UsersManagementComponentProps {
-  user: {
-    id: string
-    email?: string
-    profile?: {
-      name: string
-    }
-  }
   companyId: number
   users: CompanyUserDTO[]
   stores: StoreDTO[]
 }
 
 export default function UsersManagementComponent({
-  user,
   companyId,
   users: initialUsers,
   stores,
@@ -40,6 +32,7 @@ export default function UsersManagementComponent({
     initialUsers.forEach((companyUser) => {
       loadUserStores(companyUser.user_id)
     })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const loadUserStores = async (userId: string) => {
@@ -47,7 +40,7 @@ export default function UsersManagementComponent({
     if (data) {
       setUserStoresMap((prev) => ({
         ...prev,
-        [userId]: data.map((us: any) => ({
+        [userId]: data.map((us) => ({
           store_id: us.store_id,
           is_active: us.is_active,
         })),
@@ -62,10 +55,11 @@ export default function UsersManagementComponent({
     try {
       const email = formData.get('email') as string
       const password = formData.get('password') as string
-      const name = formData.get('name') as string
+      const last_name = formData.get('last_name') as string
+      const first_name = formData.get('first_name') as string
       const isAdmin = formData.get('isAdmin') === 'true'
 
-      if (!email || !password || !name) {
+      if (!email || !password || !last_name || !first_name) {
         setError('すべての必須項目を入力してください')
         setIsLoading(false)
         return
@@ -74,7 +68,8 @@ export default function UsersManagementComponent({
       const result = await createUser({
         email,
         password,
-        name,
+        last_name,
+        first_name,
         companyId,
         isAdmin,
       })
@@ -97,19 +92,21 @@ export default function UsersManagementComponent({
     setError(null)
 
     try {
-      const name = formData.get('name') as string
+      const last_name = formData.get('last_name') as string
+      const first_name = formData.get('first_name') as string
       const isAdmin = formData.get('isAdmin') === 'true'
       const isActive = formData.get('isActive') === 'true'
 
-      if (!name) {
-        setError('名前を入力してください')
+      if (!last_name || !first_name) {
+        setError('姓と名を入力してください')
         setIsLoading(false)
         return
       }
 
       const result = await updateUser({
         userId,
-        name,
+        last_name,
+        first_name,
         isAdmin,
         isActive,
       })
@@ -251,17 +248,31 @@ export default function UsersManagementComponent({
                   className="block w-full rounded-lg border border-gray-300 px-4 py-2.5 shadow-sm transition-all focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
                 />
               </div>
-              <div>
-                <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
-                  名前 <span className="text-red-500">*</span>
-                </label>
-                <input
-                  id="name"
-                  name="name"
-                  type="text"
-                  required
-                  className="block w-full rounded-lg border border-gray-300 px-4 py-2.5 shadow-sm transition-all focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-                />
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label htmlFor="last_name" className="block text-sm font-medium text-gray-700 mb-2">
+                    姓 <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    id="last_name"
+                    name="last_name"
+                    type="text"
+                    required
+                    className="block w-full rounded-lg border border-gray-300 px-4 py-2.5 shadow-sm transition-all focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="first_name" className="block text-sm font-medium text-gray-700 mb-2">
+                    名 <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    id="first_name"
+                    name="first_name"
+                    type="text"
+                    required
+                    className="block w-full rounded-lg border border-gray-300 px-4 py-2.5 shadow-sm transition-all focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                  />
+                </div>
               </div>
               <div className="flex items-center">
                 <input
@@ -321,18 +332,33 @@ export default function UsersManagementComponent({
                         action={(formData) => handleUpdate(companyUser.user_id, formData)}
                         className="space-y-4"
                       >
-                        <div>
-                          <label htmlFor={`name-${companyUser.user_id}`} className="block text-sm font-medium text-gray-700 mb-2">
-                            名前 <span className="text-red-500">*</span>
-                          </label>
-                          <input
-                            id={`name-${companyUser.user_id}`}
-                            name="name"
-                            type="text"
-                            defaultValue={formatUserName(companyUser.users)}
-                            required
-                            className="block w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-gray-900 shadow-sm transition-all focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-                          />
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <label htmlFor={`last_name-${companyUser.user_id}`} className="block text-sm font-medium text-gray-700 mb-2">
+                              姓 <span className="text-red-500">*</span>
+                            </label>
+                            <input
+                              id={`last_name-${companyUser.user_id}`}
+                              name="last_name"
+                              type="text"
+                              defaultValue={companyUser.users?.last_name || ''}
+                              required
+                              className="block w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-gray-900 shadow-sm transition-all focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                            />
+                          </div>
+                          <div>
+                            <label htmlFor={`first_name-${companyUser.user_id}`} className="block text-sm font-medium text-gray-700 mb-2">
+                              名 <span className="text-red-500">*</span>
+                            </label>
+                            <input
+                              id={`first_name-${companyUser.user_id}`}
+                              name="first_name"
+                              type="text"
+                              defaultValue={companyUser.users?.first_name || ''}
+                              required
+                              className="block w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-gray-900 shadow-sm transition-all focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                            />
+                          </div>
                         </div>
                         <div className="flex items-center space-x-6">
                           <div className="flex items-center">

@@ -1,13 +1,25 @@
 import { createClient } from '@/lib/supabase/server'
 import { Result, Result as R } from '@/domain/common/result'
 import { ExternalServiceError } from '@/domain/common/errors'
+import type { User as SupabaseAuthUser } from '@supabase/supabase-js'
+
+/**
+ * Supabase usersテーブルのプロフィール情報型
+ */
+interface UserProfile {
+  id: string
+  last_name: string
+  first_name: string
+  created_at: string
+  updated_at: string
+}
 
 /**
  * GetCurrentUserUseCase
  * 現在のユーザー情報を取得するユースケース
  */
 export class GetCurrentUserUseCase {
-  async execute(): Promise<Result<{ user: any; profile: any | null } | null>> {
+  async execute(): Promise<Result<{ user: SupabaseAuthUser; profile: UserProfile | null } | null>> {
     try {
       const supabase = await createClient()
 

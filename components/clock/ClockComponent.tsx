@@ -6,21 +6,17 @@ import { useRouter } from 'next/navigation'
 import TimeSelectModal from './TimeSelectModal'
 import StoreSelect from './StoreSelect'
 import { UserStoreWithStoreDTO } from '@/presentation/store/dto/store-dto'
+import { ClockRecordDTO } from '@/presentation/clock-record/dto/clock-record-dto'
+import { CurrentUserDTO } from '@/presentation/auth/dto/current-user-dto'
 
 interface ClockComponentProps {
-  user: {
-    id: string
-    email?: string
-    profile?: {
-      name: string
-    }
-  }
+  user: CurrentUserDTO
   stores: UserStoreWithStoreDTO[]
   selectedStoreId: number
   workStatus: {
     status: 'before_work' | 'working' | 'on_break' | 'finished'
-    lastRecord?: any
-    records?: any[]
+    lastRecord?: ClockRecordDTO | null
+    records?: ClockRecordDTO[]
   } | null
 }
 

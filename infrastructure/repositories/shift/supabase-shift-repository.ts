@@ -4,6 +4,20 @@ import { ShiftBreak } from '@/domain/shift/entities/shift-break'
 import { IShiftRepository } from '@/domain/shift/repositories/shift-repository'
 
 /**
+ * Supabaseから取得するshiftsテーブルのレコード型
+ */
+interface ShiftRow {
+  id: number
+  user_id: string
+  store_id: number
+  scheduled_start: string
+  scheduled_end: string
+  created_by: string
+  created_at: string
+  updated_at: string
+}
+
+/**
  * SupabaseShiftRepository
  * IShiftRepositoryのSupabase実装
  */
@@ -128,7 +142,7 @@ export class SupabaseShiftRepository implements IShiftRepository {
     }
 
     return (data || []).map(
-      (item: any) =>
+      (item) =>
         new Shift(
           item.id,
           item.user_id,
@@ -160,7 +174,7 @@ export class SupabaseShiftRepository implements IShiftRepository {
     }
 
     return (data || []).map(
-      (item: any) =>
+      (item: ShiftRow) =>
         new Shift(
           item.id,
           item.user_id,
@@ -239,7 +253,7 @@ export class SupabaseShiftRepository implements IShiftRepository {
     }
 
     return (data || []).map(
-      (item: any) =>
+      (item) =>
         new ShiftBreak(
           item.id,
           item.shift_id,
@@ -305,7 +319,7 @@ export class SupabaseShiftRepository implements IShiftRepository {
     }
 
     return (data || []).map(
-      (item: any) =>
+      (item: ShiftRow) =>
         new Shift(
           item.id,
           item.user_id,
@@ -328,7 +342,7 @@ export class SupabaseShiftRepository implements IShiftRepository {
     startDate: Date,
     endDate: Date,
     storeId?: number
-  ): Promise<any[]> {
+  ): Promise<Array<ShiftRow & { company_stores: Array<{ id: number; name: string }> | { id: number; name: string } | null }>> {
     let query = this.supabase
       .from('shifts')
       .select(`

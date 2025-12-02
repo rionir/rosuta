@@ -50,7 +50,6 @@ export default async function UsersManagementPage() {
 
   return (
     <UsersManagementComponent
-      user={user}
       companyId={companyId}
       users={users || []}
       stores={stores || []}
