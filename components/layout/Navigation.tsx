@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
 import { usePathname } from 'next/navigation'
-import { signOut } from '@/lib/actions/auth'
+import { signOut } from '@/presentation/auth/actions/auth'
 import { ThemeToggle } from '@/components/theme/ThemeToggle'
 
 interface NavigationProps {

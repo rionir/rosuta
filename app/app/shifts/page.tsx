@@ -1,5 +1,5 @@
-import { getCurrentUser } from '@/lib/actions/auth'
-import { getUserStores } from '@/lib/actions/user-stores'
+import { getCurrentUser } from '@/presentation/auth/actions/auth'
+import { getUserStores } from '@/presentation/store/actions/user-stores'
 import { redirect } from 'next/navigation'
 import CalendarComponent from '@/components/calendar/CalendarComponent'
 
@@ -11,11 +11,13 @@ export default async function ShiftsPage({
 }: {
   searchParams: Promise<{ year?: string; month?: string; storeId?: string }>
 }) {
-  const { data: user } = await getCurrentUser()
+  const userResult = await getCurrentUser()
 
-  if (!user) {
+  if ('error' in userResult || !userResult.data) {
     redirect('/app/login')
   }
+
+  const user = userResult.data
 
   // ユーザーが所属する店舗一覧を取得
   const { data: userStores } = await getUserStores(user.id)

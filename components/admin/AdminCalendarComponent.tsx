@@ -2,8 +2,10 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { getAdminCalendarData, getUnclockedUsers } from '@/lib/actions/admin-calendar'
+import { getAdminCalendarData, getUnclockedUsers } from '@/presentation/admin-calendar/actions/admin-calendar'
 import { formatUserName } from '@/lib/utils/user-name'
+import { UserStoreWithStoreDTO } from '@/presentation/store/dto/store-dto'
+import { UserStoreDTO } from '@/presentation/store/dto/store-dto'
 
 interface AdminCalendarComponentProps {
   user: {
@@ -13,21 +15,8 @@ interface AdminCalendarComponentProps {
       name: string
     }
   }
-  stores: Array<{
-    store_id: number
-    company_stores: {
-      id: number
-      name: string
-    }
-  }>
-  storeUsers: Array<{
-    user_id: string
-    users: {
-      id: string
-      last_name: string
-      first_name: string
-    }
-  }>
+  stores: UserStoreWithStoreDTO[]
+  storeUsers: UserStoreDTO[]
   year: number
   month: number
   selectedStoreId: number
@@ -308,11 +297,13 @@ export default function AdminCalendarComponent({
             onChange={(e) => handleStoreChange(parseInt(e.target.value))}
             className="block w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-gray-900 shadow-sm transition-all focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 hover:border-gray-400"
           >
-            {stores.map((store) => (
-              <option key={store.store_id} value={store.store_id}>
-                {store.company_stores.name}
-              </option>
-            ))}
+            {stores
+              .filter((store) => store.company_stores !== null)
+              .map((store) => (
+                <option key={store.store_id} value={store.store_id}>
+                  {store.company_stores!.name}
+                </option>
+              ))}
           </select>
         </div>
 
@@ -327,11 +318,13 @@ export default function AdminCalendarComponent({
               className="block w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-gray-900 shadow-sm transition-all focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 hover:border-gray-400"
             >
               <option value="">すべてのスタッフ</option>
-              {storeUsers.map((storeUser) => (
-                <option key={storeUser.user_id} value={storeUser.user_id}>
-                  {formatUserName(storeUser.users, { noSpace: true })}
-                </option>
-              ))}
+              {storeUsers
+                .filter((storeUser) => storeUser.users !== null)
+                .map((storeUser) => (
+                  <option key={storeUser.user_id} value={storeUser.user_id}>
+                    {formatUserName(storeUser.users!, { noSpace: true })}
+                  </option>
+                ))}
             </select>
           </div>
         )}

@@ -1,4 +1,4 @@
-import { getCurrentUser, isUserAdmin } from '@/lib/actions/auth'
+import { getCurrentUser, isUserAdmin } from '@/presentation/auth/actions/auth'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 
@@ -6,11 +6,13 @@ import Link from 'next/link'
 export const dynamic = 'force-dynamic'
 
 export default async function AdminPage() {
-  const { data: user } = await getCurrentUser()
+  const result = await getCurrentUser()
 
-  if (!user) {
+  if ('error' in result || !result.data) {
       redirect('/app/login')
   }
+
+  const user = result.data
 
   // 管理者権限チェック
   const isAdmin = await isUserAdmin(user.id)

@@ -2,7 +2,8 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { updateStoreSettings } from '@/lib/actions/store-settings'
+import { updateStoreSettings } from '@/presentation/store-settings/actions/store-settings'
+import { StoreDTO } from '@/presentation/store/dto/store-dto'
 
 interface SettingsManagementComponentProps {
   user: {
@@ -12,11 +13,7 @@ interface SettingsManagementComponentProps {
       name: string
     }
   }
-  stores: Array<{
-    id: number
-    name: string
-    address?: string
-  }>
+  stores: StoreDTO[]
   selectedStoreId?: number
   settings: {
     id: number

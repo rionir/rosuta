@@ -1,7 +1,7 @@
-import { getCurrentUser, isUserAdmin } from '@/lib/actions/auth'
-import { getUserCompanies } from '@/lib/actions/auth'
-import { getCompanyStores } from '@/lib/actions/stores'
-import { getStoreSettings } from '@/lib/actions/store-settings'
+import { getCurrentUser, isUserAdmin } from '@/presentation/auth/actions/auth'
+import { getUserCompanies } from '@/presentation/auth/actions/auth'
+import { getCompanyStores } from '@/presentation/store/actions/stores'
+import { getStoreSettings } from '@/presentation/store-settings/actions/store-settings'
 import { redirect } from 'next/navigation'
 import SettingsManagementComponent from '@/components/admin/SettingsManagementComponent'
 
@@ -13,11 +13,13 @@ export default async function SettingsManagementPage({
 }: {
   searchParams: Promise<{ storeId?: string }>
 }) {
-  const { data: user } = await getCurrentUser()
+  const userResult = await getCurrentUser()
 
-  if (!user) {
+  if ('error' in userResult || !userResult.data) {
     redirect('/app/login')
   }
+
+  const user = userResult.data
 
   // 管理者権限チェック
   const isAdmin = await isUserAdmin(user.id)
@@ -58,7 +60,7 @@ export default async function SettingsManagementPage({
       user={user}
       stores={stores || []}
       selectedStoreId={selectedStoreId}
-      settings={settings.data}
+      settings={settings.data ?? null}
     />
   )
 }

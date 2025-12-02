@@ -1,7 +1,7 @@
-import { getCurrentUser, isUserAdmin } from '@/lib/actions/auth'
-import { getUserCompanies } from '@/lib/actions/auth'
-import { getCompanyUsers } from '@/lib/actions/users'
-import { getCompanyStores } from '@/lib/actions/stores'
+import { getCurrentUser, isUserAdmin } from '@/presentation/auth/actions/auth'
+import { getUserCompanies } from '@/presentation/auth/actions/auth'
+import { getCompanyUsers } from '@/presentation/user/actions/users'
+import { getCompanyStores } from '@/presentation/store/actions/stores'
 import { redirect } from 'next/navigation'
 import UsersManagementComponent from '@/components/admin/UsersManagementComponent'
 
@@ -9,11 +9,13 @@ import UsersManagementComponent from '@/components/admin/UsersManagementComponen
 export const dynamic = 'force-dynamic'
 
 export default async function UsersManagementPage() {
-  const { data: user } = await getCurrentUser()
+  const userResult = await getCurrentUser()
 
-  if (!user) {
+  if ('error' in userResult || !userResult.data) {
     redirect('/app/login')
   }
+
+  const user = userResult.data
 
   // 管理者権限チェック
   const isAdmin = await isUserAdmin(user.id)
@@ -55,7 +57,3 @@ export default async function UsersManagementPage() {
     />
   )
 }
-
-
-
-

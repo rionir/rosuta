@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { getCalendarData } from '@/lib/actions/calendar'
+import { getCalendarData } from '@/presentation/calendar/actions/calendar'
 import CalendarStoreSelect from './StoreSelect'
+import { UserStoreWithStoreDTO } from '@/presentation/store/dto/store-dto'
 
 interface CalendarComponentProps {
   user: {
@@ -13,13 +14,7 @@ interface CalendarComponentProps {
       name: string
     }
   }
-  stores: Array<{
-    store_id: number
-    company_stores: {
-      id: number
-      name: string
-    }
-  }>
+  stores: UserStoreWithStoreDTO[]
   year: number
   month: number
   selectedStoreId?: number

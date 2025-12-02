@@ -1,6 +1,6 @@
-import { getCurrentUser, isUserAdmin } from '@/lib/actions/auth'
-import { getUserStores } from '@/lib/actions/user-stores'
-import { getStoreUsers } from '@/lib/actions/user-stores'
+import { getCurrentUser, isUserAdmin } from '@/presentation/auth/actions/auth'
+import { getUserStores } from '@/presentation/store/actions/user-stores'
+import { getStoreUsers } from '@/presentation/store/actions/user-stores'
 import { redirect } from 'next/navigation'
 import AdminCalendarComponent from '@/components/admin/AdminCalendarComponent'
 
@@ -12,11 +12,13 @@ export default async function AdminCalendarPage({
 }: {
   searchParams: Promise<{ year?: string; month?: string; storeId?: string; userId?: string }>
 }) {
-  const { data: user } = await getCurrentUser()
+  const userResult = await getCurrentUser()
 
-  if (!user) {
+  if ('error' in userResult || !userResult.data) {
     redirect('/app/login')
   }
+
+  const user = userResult.data
 
   // 管理者権限チェック
   const isAdmin = await isUserAdmin(user.id)
@@ -25,9 +27,9 @@ export default async function AdminCalendarPage({
   }
 
   // 管理者が管理できる店舗一覧を取得
-  const { data: userStores } = await getUserStores(user.id)
+  const userStoresResult = await getUserStores(user.id)
 
-  if (!userStores || userStores.length === 0) {
+  if ('error' in userStoresResult || !userStoresResult.data || userStoresResult.data.length === 0) {
     return (
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <div className="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-blue-100">
@@ -49,19 +51,28 @@ export default async function AdminCalendarPage({
   const today = new Date()
   const year = params.year ? parseInt(params.year) : today.getFullYear()
   const month = params.month ? parseInt(params.month) : today.getMonth() + 1
+  const userStores = userStoresResult.data || []
   const selectedStoreId = params.storeId ? parseInt(params.storeId) : (userStores[0]?.store_id as number)
   const selectedUserId = params.userId || undefined
 
   // 選択された店舗のユーザー一覧を取得
-  const { data: storeUsers } = selectedStoreId
+  const storeUsersResult = selectedStoreId
     ? await getStoreUsers(selectedStoreId)
     : { data: null }
+  
+  const storeUsersData = !('error' in storeUsersResult) && storeUsersResult.data ? storeUsersResult.data : []
+
+  // UserStoreWithStoreDTOをそのまま使用（nullのcompany_storesをフィルタリング）
+  const storesForComponent = userStores.filter((us) => us.company_stores !== null)
+
+  // UserStoreDTOをそのまま使用（usersがnullのものを除外）
+  const storeUsersForComponent = storeUsersData.filter((su) => su.users !== null)
 
   return (
     <AdminCalendarComponent
       user={user}
-      stores={userStores}
-      storeUsers={storeUsers || []}
+      stores={storesForComponent}
+      storeUsers={storeUsersForComponent}
       year={year}
       month={month}
       selectedStoreId={selectedStoreId}

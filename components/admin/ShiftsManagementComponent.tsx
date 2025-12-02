@@ -2,9 +2,13 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { createShift, updateShift, deleteShift } from '@/lib/actions/shifts'
-import { copyShifts } from '@/lib/actions/shift-copies'
+import { createShift, updateShift, deleteShift } from '@/presentation/shift/actions/shifts'
+import { copyShifts } from '@/presentation/shift/actions/shift-copies'
 import { formatUserName } from '@/lib/utils/user-name'
+import { StoreDTO } from '@/presentation/store/dto/store-dto'
+import { UserStoreDTO } from '@/presentation/store/dto/store-dto'
+import { ShiftDTO } from '@/presentation/shift/dto/shift-dto'
+import { UserDTO } from '@/presentation/user/dto/user-dto'
 
 interface ShiftsManagementComponentProps {
   user: {
@@ -15,31 +19,9 @@ interface ShiftsManagementComponentProps {
     }
   }
   companyId: number
-  stores: Array<{
-    id: number
-    name: string
-    address?: string
-  }>
-  storeUsers: Array<{
-    user_id: string
-    users: {
-      id: string
-      last_name: string
-      first_name: string
-    }
-  }>
-  shifts: Array<{
-    id: number
-    user_id: string
-    store_id: number
-    scheduled_start: string
-    scheduled_end: string
-    users: {
-      id: string
-      last_name: string
-      first_name: string
-    }
-  }>
+  stores: StoreDTO[]
+  storeUsers: UserStoreDTO[]
+  shifts: Array<ShiftDTO & { users: UserDTO }>
   year: number
   month: number
   selectedStoreId?: number

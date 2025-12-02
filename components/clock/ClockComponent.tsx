@@ -1,10 +1,11 @@
 'use client'
 
 import { useState } from 'react'
-import { createClockRecord } from '@/lib/actions/clock-records'
+import { createClockRecord } from '@/presentation/clock-record/actions/clock-records'
 import { useRouter } from 'next/navigation'
 import TimeSelectModal from './TimeSelectModal'
 import StoreSelect from './StoreSelect'
+import { UserStoreWithStoreDTO } from '@/presentation/store/dto/store-dto'
 
 interface ClockComponentProps {
   user: {
@@ -14,13 +15,7 @@ interface ClockComponentProps {
       name: string
     }
   }
-  stores: Array<{
-    store_id: number
-    company_stores: {
-      id: number
-      name: string
-    }
-  }>
+  stores: UserStoreWithStoreDTO[]
   selectedStoreId: number
   workStatus: {
     status: 'before_work' | 'working' | 'on_break' | 'finished'
