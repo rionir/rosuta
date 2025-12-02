@@ -4,7 +4,8 @@
  */
 export interface UpdateUserDTO {
   userId: string
-  name?: string
+  last_name?: string
+  first_name?: string
   isAdmin?: boolean
   isActive?: boolean
 }

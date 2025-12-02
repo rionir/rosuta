@@ -70,7 +70,6 @@ export default async function AdminCalendarPage({
 
   return (
     <AdminCalendarComponent
-      user={user}
       stores={storesForComponent}
       storeUsers={storeUsersForComponent}
       year={year}

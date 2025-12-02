@@ -8,6 +8,81 @@ import { Store } from '@/domain/store/entities/store'
 import { User } from '@/domain/user/entities/user'
 
 /**
+ * Supabaseから取得するclock_recordsテーブルのレコード型
+ */
+interface ClockRecordRow {
+  id: number
+  user_id: string
+  store_id: number
+  shift_id: number | null
+  break_id: number | null
+  type: string
+  selected_time: string
+  actual_time: string
+  method: string
+  status: string
+  created_by: string
+  approved_by: string | null
+  created_at: string
+  updated_at: string
+}
+
+/**
+ * Supabaseから取得するclock_recordsテーブルのレコード型（ユーザー情報含む）
+ */
+interface ClockRecordWithUserRow extends ClockRecordRow {
+  users: Array<{
+    id: string
+    last_name: string
+    first_name: string
+  }> | {
+    id: string
+    last_name: string
+    first_name: string
+  } | null
+}
+
+/**
+ * Supabaseから取得するclock_recordsテーブルのレコード型（ユーザー情報含む、created_at/updated_at付き）
+ */
+interface ClockRecordWithUserRowFull extends ClockRecordRow {
+  users: Array<{
+    id: string
+    last_name: string
+    first_name: string
+    created_at: string
+    updated_at: string
+  }> | {
+    id: string
+    last_name: string
+    first_name: string
+    created_at: string
+    updated_at: string
+  } | null
+}
+
+/**
+ * Supabaseから取得するclock_recordsテーブルのレコード型（店舗情報含む）
+ */
+interface ClockRecordWithStoreRow extends ClockRecordRow {
+  company_stores: Array<{
+    id: number
+    company_id: number
+    name: string
+    address: string | null
+    created_at: string
+    updated_at: string
+  }> | {
+    id: number
+    company_id: number
+    name: string
+    address: string | null
+    created_at: string
+    updated_at: string
+  } | null
+}
+
+/**
  * SupabaseClockRecordRepository
  * IClockRecordRepositoryのSupabase実装
  */
@@ -111,7 +186,7 @@ export class SupabaseClockRecordRepository
       throw new Error(`Failed to find user clock records: ${error.message}`)
     }
 
-    return (data || []).map((item: any) => this.mapToEntity(item))
+    return (data || []).map((item: ClockRecordRow) => this.mapToEntity(item))
   }
 
   async findStoreClockRecords(
@@ -151,7 +226,7 @@ export class SupabaseClockRecordRepository
       throw new Error(`Failed to find store clock records: ${error.message}`)
     }
 
-    return (data || []).map((item: any) => this.mapToEntity(item))
+    return (data || []).map((item: ClockRecordRow) => this.mapToEntity(item))
   }
 
   async findPendingClockRecords(storeId: number): Promise<ClockRecord[]> {
@@ -173,7 +248,7 @@ export class SupabaseClockRecordRepository
       throw new Error(`Failed to find pending clock records: ${error.message}`)
     }
 
-    return (data || []).map((item: any) => this.mapToEntity(item))
+    return (data || []).map((item) => this.mapToEntity(item))
   }
 
   async findTodayApprovedClockRecords(
@@ -203,7 +278,7 @@ export class SupabaseClockRecordRepository
       )
     }
 
-    return (data || []).map((item: any) => this.mapToEntity(item))
+    return (data || []).map((item) => this.mapToEntity(item))
   }
 
   async findTodayPendingClockRecords(
@@ -233,13 +308,13 @@ export class SupabaseClockRecordRepository
       )
     }
 
-    return (data || []).map((item: any) => this.mapToEntity(item))
+    return (data || []).map((item: ClockRecordRow) => this.mapToEntity(item))
   }
 
   /**
    * データベースのレコードをエンティティにマッピング
    */
-  private mapToEntity(data: any): ClockRecord {
+  private mapToEntity(data: ClockRecordRow): ClockRecord {
     return new ClockRecord(
       data.id,
       data.user_id,
@@ -295,37 +370,7 @@ export class SupabaseClockRecordRepository
       throw new Error(`Failed to find user clock records: ${error.message}`)
     }
 
-    return (data || []).map((item: {
-      id: number
-      user_id: string
-      store_id: number
-      shift_id: number | null
-      break_id: number | null
-      type: string
-      selected_time: string
-      actual_time: string
-      method: string
-      status: string
-      created_by: string
-      approved_by: string | null
-      created_at: string
-      updated_at: string
-      company_stores: Array<{
-        id: number
-        company_id: number
-        name: string
-        address: string | null
-        created_at: string
-        updated_at: string
-      }> | {
-        id: number
-        company_id: number
-        name: string
-        address: string | null
-        created_at: string
-        updated_at: string
-      } | null
-    }) => {
+    return (data || []).map((item: ClockRecordWithStoreRow) => {
       const clockRecord = this.mapToEntity(item)
       
       // company_storesが配列の場合、最初の要素を取得（1対1の関係なので）
@@ -372,35 +417,7 @@ export class SupabaseClockRecordRepository
       throw new Error(`Failed to find store clock records: ${error.message}`)
     }
 
-    return (data || []).map((item: {
-      id: number
-      user_id: string
-      store_id: number
-      shift_id: number | null
-      break_id: number | null
-      type: string
-      selected_time: string
-      actual_time: string
-      method: string
-      status: string
-      created_by: string
-      approved_by: string | null
-      created_at: string
-      updated_at: string
-      users: Array<{
-        id: string
-        last_name: string
-        first_name: string
-        created_at: string
-        updated_at: string
-      }> | {
-        id: string
-        last_name: string
-        first_name: string
-        created_at: string
-        updated_at: string
-      } | null
-    }) => {
+    return (data || []).map((item: ClockRecordWithUserRowFull) => {
       const clockRecord = this.mapToEntity(item)
       
       // usersが配列の場合、最初の要素を取得（1対1の関係なので）
@@ -421,7 +438,7 @@ export class SupabaseClockRecordRepository
    * 承認待ちの打刻記録一覧を取得（ユーザー情報も含む）
    * 既存のUIとの互換性のため
    */
-  async findPendingClockRecordsWithUsers(storeId: number): Promise<any[]> {
+  async findPendingClockRecordsWithUsers(storeId: number): Promise<ClockRecordWithUserRow[]> {
     const { data, error } = await this.supabase
       .from('clock_records')
       .select(`

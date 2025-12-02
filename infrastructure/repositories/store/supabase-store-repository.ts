@@ -3,6 +3,18 @@ import { Store } from '@/domain/store/entities/store'
 import { IStoreRepository } from '@/domain/store/repositories/store-repository'
 
 /**
+ * Supabaseから取得するcompany_storesテーブルのレコード型
+ */
+interface StoreRow {
+  id: number
+  company_id: number
+  name: string
+  address: string | null
+  created_at: string
+  updated_at: string
+}
+
+/**
  * SupabaseStoreRepository
  * IStoreRepositoryのSupabase実装
  */
@@ -91,7 +103,7 @@ export class SupabaseStoreRepository implements IStoreRepository {
     }
 
     return (data || []).map(
-      (item: any) =>
+      (item: StoreRow) =>
         new Store(
           item.id,
           item.company_id,

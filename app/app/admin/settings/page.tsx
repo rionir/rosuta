@@ -57,7 +57,6 @@ export default async function SettingsManagementPage({
 
   return (
     <SettingsManagementComponent
-      user={user}
       stores={stores || []}
       selectedStoreId={selectedStoreId}
       settings={settings.data ?? null}

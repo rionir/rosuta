@@ -6,14 +6,10 @@ import { getCalendarData } from '@/presentation/calendar/actions/calendar'
 import CalendarStoreSelect from './StoreSelect'
 import { UserStoreWithStoreDTO } from '@/presentation/store/dto/store-dto'
 
+import { CurrentUserDTO } from '@/presentation/auth/dto/current-user-dto'
+
 interface CalendarComponentProps {
-  user: {
-    id: string
-    email?: string
-    profile?: {
-      name: string
-    }
-  }
+  user: CurrentUserDTO
   stores: UserStoreWithStoreDTO[]
   year: number
   month: number

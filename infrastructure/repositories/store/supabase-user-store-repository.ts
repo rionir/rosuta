@@ -5,6 +5,70 @@ import { User } from '@/domain/user/entities/user'
 import { IUserStoreRepository } from '@/domain/store/repositories/user-store-repository'
 
 /**
+ * Supabaseから取得するuser_storesテーブルのレコード型
+ */
+interface UserStoreRow {
+  id?: number
+  user_id: string
+  store_id: number
+  is_active: boolean
+  created_at: string
+  updated_at?: string
+}
+
+/**
+ * Supabaseから取得するuser_storesテーブルのレコード型（ユーザー情報含む）
+ */
+interface UserStoreWithUserRow {
+  id: number
+  user_id: string
+  store_id: number
+  is_active: boolean
+  created_at: string
+  updated_at: string
+  users: Array<{
+    id: string
+    last_name: string
+    first_name: string
+    created_at: string
+    updated_at: string
+  }> | {
+    id: string
+    last_name: string
+    first_name: string
+    created_at: string
+    updated_at: string
+  } | null
+}
+
+/**
+ * Supabaseから取得するuser_storesテーブルのレコード型（店舗情報含む）
+ */
+interface UserStoreWithStoreRow {
+  id: number
+  user_id: string
+  store_id: number
+  is_active: boolean
+  created_at: string
+  updated_at: string
+  company_stores: Array<{
+    id: number
+    company_id: number
+    name: string
+    address: string | null
+    created_at: string
+    updated_at: string
+  }> | {
+    id: number
+    company_id: number
+    name: string
+    address: string | null
+    created_at: string
+    updated_at: string
+  } | null
+}
+
+/**
  * SupabaseUserStoreRepository
  * IUserStoreRepositoryのSupabase実装
  */
@@ -107,14 +171,14 @@ export class SupabaseUserStoreRepository implements IUserStoreRepository {
     }
 
     return (data || []).map(
-      (item: any) =>
+      (item: UserStoreRow) =>
         new UserStore(
-          item.id,
+          item.id || 0,
           item.user_id,
           item.store_id,
           item.is_active,
           new Date(item.created_at),
-          new Date(item.updated_at)
+          new Date(item.updated_at || item.created_at)
         )
     )
   }
@@ -143,14 +207,14 @@ export class SupabaseUserStoreRepository implements IUserStoreRepository {
 
     // UserStoreエンティティとして返す（users情報は別途取得が必要な場合は別メソッドで対応）
     return (data || []).map(
-      (item: any) =>
+      (item: UserStoreRow) =>
         new UserStore(
           item.id || 0, // IDが含まれていない場合は0を設定
           item.user_id,
           item.store_id,
           item.is_active,
           new Date(item.created_at),
-          new Date(item.created_at) // updated_atが含まれていない場合はcreated_atを使用
+          new Date(item.updated_at || item.created_at) // updated_atが含まれていない場合はcreated_atを使用
         )
     )
   }
@@ -203,29 +267,7 @@ export class SupabaseUserStoreRepository implements IUserStoreRepository {
       throw new Error(`Failed to find user stores: ${error.message}`)
     }
 
-    return (data || []).map((item: {
-      id: number
-      user_id: string
-      store_id: number
-      is_active: boolean
-      created_at: string
-      updated_at: string
-      company_stores: Array<{
-        id: number
-        company_id: number
-        name: string
-        address: string | null
-        created_at: string
-        updated_at: string
-      }> | {
-        id: number
-        company_id: number
-        name: string
-        address: string | null
-        created_at: string
-        updated_at: string
-      } | null
-    }) => {
+    return (data || []).map((item: UserStoreWithStoreRow) => {
       const userStore = new UserStore(
         item.id,
         item.user_id,
@@ -279,27 +321,7 @@ export class SupabaseUserStoreRepository implements IUserStoreRepository {
       throw new Error(`Failed to find store users: ${error.message}`)
     }
 
-    return (data || []).map((item: {
-      id: number
-      user_id: string
-      store_id: number
-      is_active: boolean
-      created_at: string
-      updated_at: string
-      users: Array<{
-        id: string
-        last_name: string
-        first_name: string
-        created_at: string
-        updated_at: string
-      }> | {
-        id: string
-        last_name: string
-        first_name: string
-        created_at: string
-        updated_at: string
-      } | null
-    }) => {
+    return (data || []).map((item: UserStoreWithUserRow) => {
       const userStore = new UserStore(
         item.id,
         item.user_id,

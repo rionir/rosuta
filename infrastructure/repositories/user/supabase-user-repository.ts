@@ -129,7 +129,7 @@ export class SupabaseUserRepository implements IUserRepository {
     }
 
     return (data || []).map(
-      (item: any) =>
+      (item) =>
         new CompanyUser(
           item.id,
           item.company_id,
@@ -146,7 +146,26 @@ export class SupabaseUserRepository implements IUserRepository {
    * 企業に所属するユーザー一覧を取得（users情報も含む）
    * 既存のUIとの互換性のため
    */
-  async findCompanyUsersWithUsers(companyId: number): Promise<any[]> {
+  async findCompanyUsersWithUsers(companyId: number): Promise<Array<{
+    id: number
+    company_id: number
+    user_id: string
+    is_admin: boolean
+    is_active: boolean
+    created_at: string
+    updated_at: string
+    users: Array<{
+      id: string
+      last_name: string
+      first_name: string
+      created_at: string
+    }> | {
+      id: string
+      last_name: string
+      first_name: string
+      created_at: string
+    } | null
+  }>> {
     const { data, error } = await this.supabase
       .from('company_users')
       .select(`
@@ -217,7 +236,7 @@ export class SupabaseUserRepository implements IUserRepository {
     }
 
     return (data || []).map(
-      (item: any) =>
+      (item) =>
         new CompanyUser(
           item.id,
           item.company_id,

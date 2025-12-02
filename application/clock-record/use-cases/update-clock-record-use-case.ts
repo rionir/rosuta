@@ -1,5 +1,5 @@
 import { IClockRecordRepository } from '@/domain/clock-record/repositories/clock-record-repository'
-import { ClockRecordStatus, createClockRecordStatus } from '@/domain/clock-record/value-objects/clock-record-status'
+import { createClockRecordStatus } from '@/domain/clock-record/value-objects/clock-record-status'
 import { ClockRecordService } from '@/domain/clock-record/services/clock-record-service'
 import { UpdateClockRecordDTO } from '../dto/update-clock-record-dto'
 import { SupabaseClient } from '@supabase/supabase-js'

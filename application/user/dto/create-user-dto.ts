@@ -5,7 +5,8 @@
 export interface CreateUserDTO {
   email: string
   password: string
-  name: string
+  last_name: string
+  first_name: string
   companyId: number
   isAdmin?: boolean
 }

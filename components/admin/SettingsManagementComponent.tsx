@@ -6,13 +6,6 @@ import { updateStoreSettings } from '@/presentation/store-settings/actions/store
 import { StoreDTO } from '@/presentation/store/dto/store-dto'
 
 interface SettingsManagementComponentProps {
-  user: {
-    id: string
-    email?: string
-    profile?: {
-      name: string
-    }
-  }
   stores: StoreDTO[]
   selectedStoreId?: number
   settings: {
@@ -23,7 +16,6 @@ interface SettingsManagementComponentProps {
 }
 
 export default function SettingsManagementComponent({
-  user,
   stores,
   selectedStoreId,
   settings: initialSettings,

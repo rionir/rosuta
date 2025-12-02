@@ -6,19 +6,11 @@ import { createStore, updateStore } from '@/presentation/store/actions/stores'
 import { StoreDTO } from '@/presentation/store/dto/store-dto'
 
 interface StoresManagementComponentProps {
-  user: {
-    id: string
-    email?: string
-    profile?: {
-      name: string
-    }
-  }
   companyId: number
   stores: StoreDTO[]
 }
 
 export default function StoresManagementComponent({
-  user,
   companyId,
   stores,
 }: StoresManagementComponentProps) {
@@ -262,7 +254,3 @@ export default function StoresManagementComponent({
     </div>
   )
 }
-
-
-
-

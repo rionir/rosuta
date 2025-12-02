@@ -23,7 +23,7 @@ export class UpdateUserUseCase {
       }
 
       // usersテーブルの更新
-      if (dto.name) {
+      if (dto.last_name !== undefined || dto.first_name !== undefined) {
         const user = await this.userRepository.findById(dto.userId)
         if (!user) {
           return R.failure(
@@ -31,10 +31,9 @@ export class UpdateUserUseCase {
           )
         }
 
-        // 名前をlast_nameとfirst_nameに分割
-        const nameParts = dto.name.trim().split(/\s+/)
-        const lastName = nameParts[0] || ''
-        const firstName = nameParts.slice(1).join(' ') || ''
+        // last_nameとfirst_nameの決定（部分的に更新する場合も対応）
+        const lastName = dto.last_name !== undefined ? dto.last_name.trim() : user.lastName
+        const firstName = dto.first_name !== undefined ? dto.first_name.trim() : user.firstName
 
         const updatedUser = user.updateName(lastName, firstName)
         await this.userRepository.updateUser(updatedUser)

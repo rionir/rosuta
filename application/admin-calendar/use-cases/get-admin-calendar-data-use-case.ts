@@ -3,6 +3,7 @@ import { getStoreClockRecords } from '@/presentation/clock-record/actions/clock-
 import { createClient } from '@/lib/supabase/server'
 import { Result, Result as R } from '@/domain/common/result'
 import { ValidationError, DatabaseError, ExternalServiceError } from '@/domain/common/errors'
+import { ShiftDTO } from '@/presentation/shift/dto/shift-dto'
 
 export interface AdminCalendarDayData {
   date: string
@@ -16,7 +17,7 @@ export interface AdminCalendarDayData {
       last_name: string
       first_name: string
       name?: string
-    }
+    } | null
   }>
   clockRecords: Array<{
     id: number
@@ -31,7 +32,7 @@ export interface AdminCalendarDayData {
       last_name: string
       first_name: string
       name?: string
-    }
+    } | null
   }>
 }
 
@@ -106,7 +107,7 @@ export class GetAdminCalendarDataUseCase {
         )
       }
 
-      let shifts = shiftsResult.data || []
+      const shifts = shiftsResult.data || []
       let clockRecords = clockRecordsResult.data || []
 
       // ユーザー情報をマップに変換（storeUsersから取得）
@@ -129,16 +130,18 @@ export class GetAdminCalendarDataUseCase {
       }
 
       // シフトデータにユーザー情報をマージ
-      shifts = shifts.map((shift: any) => {
+      type ShiftWithUser = ShiftDTO & { users: { id: string; last_name: string; first_name: string } | null }
+      const shiftsWithUsers: ShiftWithUser[] = shifts.map((shift) => {
         const userInfo = userMap.get(shift.user_id)
         return {
           ...shift,
           users: userInfo || null,
         }
       })
+      let shiftsTyped: ShiftWithUser[] = shiftsWithUsers
 
       // 打刻記録データにユーザー情報をマージ
-      clockRecords = clockRecords.map((record: any) => {
+      clockRecords = clockRecords.map((record) => {
         // usersが配列の場合、最初の要素を取得（1対1の関係なので）
         const recordUser = Array.isArray(record.users)
           ? record.users[0]
@@ -152,7 +155,7 @@ export class GetAdminCalendarDataUseCase {
 
       // 特定ユーザーでフィルター
       if (userId) {
-        shifts = shifts.filter((shift) => shift.user_id === userId)
+        shiftsTyped = shiftsTyped.filter((shift) => shift.user_id === userId)
         clockRecords = clockRecords.filter(
           (record) => record.user_id === userId
         )
@@ -162,7 +165,7 @@ export class GetAdminCalendarDataUseCase {
       const calendarData: Record<string, AdminCalendarDayData> = {}
 
       // シフトを日付ごとにグループ化（scheduled_startから日付を抽出）
-      shifts.forEach((shift: any) => {
+      shiftsTyped.forEach((shift) => {
         // scheduled_startはTIMESTAMP型なので、日付部分を抽出
         const date = new Date(shift.scheduled_start).toISOString().split('T')[0]
         if (!calendarData[date]) {
@@ -172,13 +175,11 @@ export class GetAdminCalendarDataUseCase {
             clockRecords: [],
           }
         }
-        calendarData[date].shifts.push(
-          shift as AdminCalendarDayData['shifts'][0]
-        )
+        calendarData[date].shifts.push(shift)
       })
 
       // 打刻記録を日付ごとにグループ化
-      clockRecords.forEach((record: any) => {
+      clockRecords.forEach((record) => {
         const date = record.selected_time.split('T')[0]
         if (!calendarData[date]) {
           calendarData[date] = {
@@ -187,9 +188,7 @@ export class GetAdminCalendarDataUseCase {
             clockRecords: [],
           }
         }
-        calendarData[date].clockRecords.push(
-          record as AdminCalendarDayData['clockRecords'][0]
-        )
+        calendarData[date].clockRecords.push(record)
       })
 
       return R.success(Object.values(calendarData))
